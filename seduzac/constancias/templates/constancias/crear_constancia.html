@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Crear Constancia</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if configuracion and configuracion.logo %}
+        <p>Logo actual:</p>
+        <img src="{{ configuracion.logo.url }}" alt="Logo actual" style="max-width: 200px;">
+    {% endif %}
+    <button type="submit">Crear Constancia</button>
+</form>
+{% endblock %}
