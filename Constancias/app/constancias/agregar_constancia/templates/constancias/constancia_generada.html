@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia Generada</title>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .printable-area, .printable-area * {
+                visibility: visible;
+            }
+            .printable-area {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% load static %}
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <div class="printable-area">
+
+        <h1>Constancia</h1>
+        {% if constancia.incluir_logo %}
+            <img src="{{ constancia.logo.url }}" alt="Logo de la constancia" style="width: 100px; height: auto;">
+        {% endif %}
+        <p>Nombre: {{ constancia.nombre_completo }}</p>
+        
+    </div>
+
+    <div class="no-print">
+        <button onclick="window.print()">Imprimir</button>
+        <a href="{% url 'crear_constancia' %}" class="button">Generar otra constancia</a>
+        <a href="{% url 'lista_constancias' %}" class="button">Ver la lista de constancias</a>
+    </div>
+</body>
+</html>

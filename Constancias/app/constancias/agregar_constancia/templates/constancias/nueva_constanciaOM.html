@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if editar %}Actualizar{% else %}Agregar{% endif %} constancia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        .clave-item {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+        .clave-item input {
+            flex: 1;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        .btn-eliminar {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>{% if editar %}Actualizar{% else %}Agregar{% endif %} constancia</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Formulario de Constancia -->
+        {{ form.as_p }}
+
+        <!-- Manejo de logo -->
+        <h2>Logo</h2>
+        {% if configuracion and configuracion.logo %}
+            <p>Logo actual:</p>
+            <img src="{{ configuracion.logo.url }}" alt="Logo actual" style="max-width: 200px;">
+        {% endif %}
+
+        <!-- Claves Asociadas -->
+        <h2>Claves Asociadas</h2>
+        <div id="claves-container">
+            {% for clave in claves_existentes %}
+                <div class="clave-item">
+                    <input type="text" id="clave-{{ forloop.counter }}" name="claves[]" value="{{ clave.clave }}" placeholder="Escribe una clave">
+                    <button type="button" class="btn-eliminar" onclick="eliminarClave('{{ forloop.counter }}')">Borrar</button>
+                </div>
+            {% endfor %}
+            <div class="clave-item">
+                <input type="text" id="clave-nueva" name="claves[]" placeholder="Escribe una clave">
+                <button type="button" class="btn-eliminar" onclick="eliminarClave(0)">Borrar</button>
+            </div>
+        </div>
+
+        <button type="button" onclick="addNewClave()">Agregar otra clave</button>
+        <button type="submit" id="btnAgregar">
+            {% if editar %}Actualizar{% else %}Agregar{% endif %} constancia
+        </button>
+    </form>
+
+    <p><a href="{% url 'lista_constancias' %}">Volver a la lista de constancias</a></p>
+
+    <script>
+        let claveCount = 0;
+        let contratoCount = 0;  // Inicializar un contador para contratos
+        let licenciaCount = 0;  // Inicializar un contador para licencias
+        function updateDeleteButtons() {
+            // Actualizar los índices de los botones de borrar
+            document.querySelectorAll('.clave-item').forEach((item, index) => {
+                item.querySelector('.btn-eliminar').setAttribute('onclick', `eliminarClave(${index})`);
+            });
+        }
+        function addNewClave() {
+            claveCount++;
+
+            const claveItem = document.createElement('div');
+            claveItem.className = 'clave-item';
+
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.id = `clave-nueva${claveCount}`;
+            newInput.name = 'claves[]';
+            newInput.placeholder = 'Escribe una clave';
+            claveItem.appendChild(newInput);
+
+            const claveItemscount = document.querySelectorAll('.clave-item').length;
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'btn-eliminar';
+            deleteButton.textContent = 'Borrar';
+            deleteButton.setAttribute('onclick', `eliminarClave(${claveItemscount})`);
+
+            claveItem.appendChild(deleteButton);
+
+            document.getElementById('claves-container').appendChild(claveItem);
+            updateDeleteButtons();
+        }
+        
+        function eliminarClave(index) {
+            const claveContainer = document.getElementById('claves-container');
+            claveContainer.children[index].remove();
+            updateDeleteButtons();
+        }
+    </script>
+    
+</body>
+</html>

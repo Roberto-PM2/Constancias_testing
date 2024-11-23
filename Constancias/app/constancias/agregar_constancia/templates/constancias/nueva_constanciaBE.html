@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if editar %}Actualizar{% else %}Agregar{% endif %} constancia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        .clave-item {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+        .clave-item input {
+            flex: 1;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        .btn-eliminar {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body onload="updateDeleteButtons()">
+
+    <h1>{% if editar %}Actualizar{% else %}Agregar{% endif %} constancia</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Formulario de Constancia -->
+        {{ form.as_p }}
+
+        <!-- Manejo de logo -->
+        <h2>Logo</h2>
+        {% if configuracion and configuracion.logo %}
+            <p>Logo actual:</p>
+            <img src="{{ configuracion.logo.url }}" alt="Logo actual" style="max-width: 200px;">
+        {% endif %}
+
+        <!-- Claves Asociadas -->
+        <h2>Claves Asociadas</h2>
+        <div id="claves-container">
+            {% for clave in claves_existentes %}
+                <div class="clave-item">
+                    <input type="text" id="clave-{{ forloop.counter }}" name="claves[]" value="{{ clave.clave }}" placeholder="Escribe una clave">
+                    <button type="button" class="btn-eliminar" onclick="eliminarClave('{{ forloop.counter }}')">Borrar</button>
+                </div>
+            {% endfor %}
+            <div class="clave-item">
+                <input type="text" id="clave-nueva" name="claves[]" placeholder="Escribe una clave">
+                <button type="button" class="btn-eliminar" onclick="eliminarClave(0)">Borrar</button>
+            </div>
+        </div>
+
+        <button type="button" onclick="addNewClave()">Agregar otra clave</button>
+
+        <!-- Contratos -->
+        <h2>Contratos</h2>
+        <div id="contratos-container">
+            {% for contrato in contratos_existentes %}
+                <div class="contrato-item" id="contrato-{{ forloop.counter }}">
+                    <input type="text" id="contrato-adscripcion-{{ forloop.counter }}" name="contratos_adscripcion[]" value="{{ contrato.adscripcion }}" placeholder="Clave de Centro de Trabajo">
+                    <input type="text" id="contrato-clave-categoria-{{ forloop.counter }}" name="contratos_clave_categoria[]" value="{{ contrato.clave_categoria }}" placeholder="Clave de Categoría">
+                    <input type="text" id="contrato-codigo-{{ forloop.counter }}" name="contratos_codigo[]" value="{{ contrato.codigo }}" placeholder="Código">
+
+                    <label>Fecha de Inicio:</label>
+                    <input type="date" id="contrato-fecha-inicio-{{ forloop.counter }}" name="contratos_fecha_inicio[]" value="{{ contrato.fecha_inicio|date:'Y-m-d' }}" placeholder="Fecha de Inicio">
+
+                    <label>Fecha de Término:</label>
+                    <input type="date" id="contrato-fecha-termino-{{ forloop.counter }}" name="contratos_fecha_termino[]" value="{{ contrato.fecha_termino|date:'Y-m-d' }}" placeholder="Fecha de Término">
+                    <button type="button" class="btn-eliminar" onclick="eliminarContrato('{{ forloop.counter }}')">Borrar</button>
+                </div>
+            {% endfor %}
+            <div class="contrato-item">
+                <input type="text" id="contrato-adscripcion-nueva" name="contratos_adscripcion[]" placeholder="Clave de Centro de Trabajo">
+                <input type="text" id="contrato-clave-categoria-nueva" name="contratos_clave_categoria[]" placeholder="Clave de Categoría">
+                <input type="text" id="contrato-codigo-nueva" name="contratos_codigo[]" placeholder="Código">
+
+                <label>Fecha de Inicio:</label>
+                <input type="date" id="contrato-fecha-inicio-nueva" name="contratos_fecha_inicio[]" placeholder="Fecha de Inicio">
+
+                <label>Fecha de Término:</label>
+                <input type="date" id="contrato-fecha-termino-nueva" name="contratos_fecha_termino[]" placeholder="Fecha de Término">
+                <button type="button" class="btn-eliminar" onclick="eliminarContrato(0)">Borrar</button>
+            </div>
+        </div>
+        <button type="button" onclick="addNewContrato()">Agregar otro contrato</button>
+        <div class="total-time" id="total-contrato-time">Tiempo total de contratos: 0 años, 0 meses, 0 días</div>
+
+        <button type="submit" id="btnAgregar">
+            {% if editar %}Actualizar{% else %}Agregar{% endif %} constancia
+        </button>
+    </form>
+
+    <p><a href="{% url 'lista_constancias' %}">Volver a la lista de constancias</a></p>
+
+    <script>
+        let claveCount = 0;
+        let contratoCount = 0;  // Inicializar un contador para contratos
+        function updateDeleteButtons() {
+            // Actualizar los índices de los botones de borrar
+            document.querySelectorAll('.clave-item').forEach((item, index) => {
+                item.querySelector('.btn-eliminar').setAttribute('onclick', `eliminarClave(${index})`);
+            });
+            document.querySelectorAll('.contrato-item').forEach((item, index) => {
+                item.querySelector('.btn-eliminar').setAttribute('onclick', `eliminarContrato(${index})`);
+            });
+        }
+        function addNewClave() {
+            claveCount++;
+
+            const claveItem = document.createElement('div');
+            claveItem.className = 'clave-item';
+
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.id = `clave-nueva${claveCount}`;
+            newInput.name = 'claves[]';
+            newInput.placeholder = 'Escribe una clave';
+            claveItem.appendChild(newInput);
+
+            const claveItemscount = document.querySelectorAll('.clave-item').length;
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'btn-eliminar';
+            deleteButton.textContent = 'Borrar';
+            deleteButton.setAttribute('onclick', `eliminarClave(${claveItemscount})`);
+
+            claveItem.appendChild(deleteButton);
+
+            document.getElementById('claves-container').appendChild(claveItem);
+            updateDeleteButtons();
+        }
+        
+
+        function addNewContrato() {
+            contratoCount++;  // Incrementar el contador de contratos
+
+            const contratoItem = document.createElement('div');
+            contratoItem.className = 'contrato-item';
+            contratoItem.innerHTML = `
+                <input type="text" name="contratos_adscripcion[]" id="contrato-adscripcion-nueva-${contratoCount}" placeholder="Clave de Centro de Trabajo">
+                <input type="text" name="contratos_clave_categoria[]" id="contrato-clave-categoria-nueva-${contratoCount}" placeholder="Clave de Categoría">
+                <input type="text" name="contratos_codigo[]" id="contrato-codigo-nueva-${contratoCount}" placeholder="Código">
+                <label for="contrato-fecha-inicio-nueva-${contratoCount}">Fecha de Inicio:</label>
+                <input type="date" name="contratos_fecha_inicio[]" id="contrato-fecha-inicio-nueva-${contratoCount}" onchange="calculateTotalTime()">
+                <label for="contrato-fecha-termino-nueva-${contratoCount}">Fecha de Término:</label>
+                <input type="date" name="contratos_fecha_termino[]" id="contrato-fecha-termino-nueva-${contratoCount}" onchange="calculateTotalTime()">
+            `;
+
+            const contratoItemscount = document.querySelectorAll('.contrato-item').length;
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'btn-eliminar';
+            deleteButton.textContent = 'Borrar';
+            deleteButton.setAttribute('onclick', `eliminarContrato(${contratoItemscount})`);
+            contratoItem.appendChild(deleteButton);
+            document.getElementById('contratos-container').appendChild(contratoItem);
+            updateDeleteButtons();
+        }
+
+        
+        function eliminarClave(index) {
+            const claveContainer = document.getElementById('claves-container');
+            claveContainer.children[index].remove();
+            updateDeleteButtons();
+        }
+
+        function eliminarContrato(index) {
+            const contratoContainer = document.getElementById('contratos-container');
+            contratoContainer.children[index].remove();
+            updateDeleteButtons();
+        }
+
+    </script>
+
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Función para calcular el tiempo total para contratos
+            function calcularTiempoContratosAjax() {
+                const fechas_inicio = [];
+                const fechas_fin = [];
+                
+                $('#contratos-container .contrato-item').each(function() {
+                    const fechaInicio = $(this).find('[name*="fecha_inicio[]"]').val();
+                    const fechaFin = $(this).find('[name*="fecha_termino[]"]').val();
+                    
+                    if (fechaInicio && fechaFin) {
+                        fechas_inicio.push(fechaInicio);
+                        fechas_fin.push(fechaFin);
+                    }
+                });
+    
+                $.ajax({
+                    url: "{% url 'calcular_duracion' %}",
+                    type: "POST",
+                    data: {
+                        'tipo': 'contratos',
+                        'fechas_inicio[]': fechas_inicio,
+                        'fechas_fin[]': fechas_fin,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        $('#total-contrato-time').text(`Tiempo total de contratos: ${response.years} años, ${response.months} meses, ${response.days} días`);
+                    }
+                });
+            }
+    
+            // Llama a las funciones de cálculo al cargar la página
+            calcularTiempoContratosAjax();
+
+            // Detecta cambios en los campos de fecha de contratos y licencias
+            $('#contratos-container').on('change', '[name*="fecha_inicio[]"], [name*="fecha_termino[]"]', function() {
+                calcularTiempoContratosAjax();
+            });
+    
+        });
+    </script>
+    
+</body>
+</html>

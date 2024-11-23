@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificar RFC</title>
+</head>
+<body>
+    <h2>Verificar RFC</h2>
+    {% if error %}
+        <p style="color:red">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <label for="rfc">RFC:</label>
+        <input type="text" id="rfc" name="rfc" maxlength="13" required>
+        <button type="submit">Verificar</button>
+    </form>
+</body>
+</html>
