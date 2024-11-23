@@ -1,0 +1,110 @@
+<!-- constancias/templates/constancias/lista_constancias.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Constancias</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .button-toggle {
+            padding: 5px 10px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            cursor: pointer;
+        }
+        .button-toggle.inactiva {
+            background-color: #f44336;
+        }
+    </style>
+    <body>
+        <h1>Lista de Constancias</h1>
+    
+        <!-- Campo oculto para el token CSRF -->
+        <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+    
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    {% if user.is_staff %}
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for constancia in constancias %}
+                    <tr>
+                        <td>{{ constancia.nombre }}</td>
+                        {% if user.is_staff %}
+                            <td id="estado-{{ constancia.id }}">
+                                {% if constancia.activo %}
+                                    Activa
+                                {% else %}
+                                    Inactiva
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button 
+                                    id="button-{{ constancia.id }}" 
+                                    class="button-toggle {% if not constancia.activo %}inactiva{% endif %}"
+                                    onclick="toggleEstado({{ constancia.id }})"
+                                >
+                                    {% if constancia.activo %}
+                                        Desactivar
+                                    {% else %}
+                                        Activar
+                                    {% endif %}
+                                </button> 
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    
+        <script>
+            async function toggleEstado(constanciaId) {
+                try {
+                    // Obtén el token CSRF desde el campo oculto
+                    const csrfToken = document.getElementById('csrfToken').value;
+    
+                    const response = await fetch(`/constancias/${constanciaId}/cambiar_estado/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify({})  // Enviar un cuerpo vacío
+                    });
+    
+                    const data = await response.json();
+                    if (data.status === "success") {
+                        const estadoSpan = document.getElementById(`estado-${constanciaId}`);
+                        estadoSpan.textContent = data.nuevo_estado ? "Activa" : "Inactiva";
+    
+                        const button = document.getElementById(`button-${constanciaId}`);
+                        button.classList.toggle('inactiva', !data.nuevo_estado);
+                        button.textContent = data.nuevo_estado ? "Desactivar" : "Activar";
+                    } else {
+                        alert("Error al cambiar el estado.");
+                    }
+                } catch (error) {
+                    console.error("Error en la petición:", error);
+                }
+            }
+        </script>
+    </body>
+</html>
