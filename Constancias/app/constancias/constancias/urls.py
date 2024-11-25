@@ -12,6 +12,7 @@ urlpatterns = [
     path('rfc/', include('rfc.urls')),
     path('', constancias_views.inicio, name='inicio'),
     path('constancias/', include('agregar_constancia.urls')),
+    path('filtros/', include('filtros.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
