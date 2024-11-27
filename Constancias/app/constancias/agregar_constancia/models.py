@@ -26,8 +26,8 @@ class Constancia(models.Model):
     tipo_constancia = models.CharField(max_length=20, choices=TIPOS_CONSTANCIA)
     Activa = models.BooleanField(default=True)
 
-    # Datos básicos del docente
-    curp = models.CharField(max_length=18, validators=[curp_validator])
+    # Datos básicos del docente se quita el validador de curp por el momento al estar obsuscados en la bd
+    curp = models.CharField(max_length=18) #validators=[curp_validator]
     filiacion = models.CharField(max_length=13)  # RFC
     nombre_completo = models.CharField(max_length=255)
     categoria_plaza = models.CharField(max_length=100)

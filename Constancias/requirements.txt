@@ -4,4 +4,4 @@ pillow==10.4.0
 reportlab==4.2.2
 reportlab-qrcode==0.1.6
 psycopg2-binary
-
+mysql-connector-python

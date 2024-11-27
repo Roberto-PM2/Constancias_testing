@@ -1,46 +1,52 @@
-# app/constancias/rfc/views.py
-from django.shortcuts import render, redirect
-from django.db import connection
+from django.shortcuts import render, get_object_or_404
+from django.db import connections
+import re
+
 
 def validar_rfc(rfc):
-    if len(rfc) != 13:  # Longitud estándar del RFC de persona moral o física
-        return "El RFC debe tener 13 caracteres."
-    if not rfc.isalnum():
-        return "El RFC solo debe contener letras y números."
-    return None
+    """Valida que el RFC tenga 13 caracteres y no contenga caracteres especiales."""
+    if len(rfc) != 13:
+        return False, "El RFC debe tener 13 caracteres."
+    if not re.match(r"^[A-Za-z0-9]+$", rfc):
+        return False, "El RFC no debe contener caracteres especiales."
+    return True, ""
 
-def verificar_rfc(request):
+
+def ingresar_rfc(request):
     if request.method == 'POST':
         rfc = request.POST.get('rfc', '').strip()
         
-        # Validación de formato del RFC
-        mensaje_error = validar_rfc(rfc)
-        if mensaje_error:
-            return render(request, 'validar_rfc.html', {'error': mensaje_error})
-
-        # Verificar existencia en la base de datos
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT rfc, nombre, curp FROM EMPLEADO_COMP WHERE rfc = %s", [rfc])
-            row = cursor.fetchone()
+        es_valido, error = validar_rfc(rfc)
+        if not es_valido:
+            return render(request, 'ingresar_rfc.html', {'error': error})
         
-        if row is None:
-            return render(request, 'validar_rfc.html', {'error': "Empleado no encontrado."})
+        sql = """
+           SELECT NOMBRE, CURP FROM EMPLEADO_COMP WHERE RFC = %s
+        """
+        with connections['personal'].cursor() as cursor:
+            cursor.execute(sql, [rfc])
+            result = cursor.fetchone()
 
-        # Guardar datos en sesión para que estén disponibles en la selección de constancia
-        request.session['datos_empleado'] = {'RFC': row[0], 'nombre': row[1], 'CURP': row[2]}
-        return redirect('seleccionar_constancia')
+        if result:
+            empleado = {"nombre": result[0], "curp": result[1], "rfc": rfc}
+            return render(request, 'seleccionar_constancia.html', {'empleado': empleado})
+        else:
+            return render(request, 'ingresar_rfc.html', {'error': "No se encontró un empleado con el RFC ingresado."})
     
-    return render(request, 'validar_rfc.html')
+    return render(request, 'ingresar_rfc.html')
 
-def seleccionar_constancia(request):
-    datos_empleado = request.session.get('datos_empleado')
-    if not datos_empleado:
-        return redirect('verificar_rfc')
-    
-    constancia_tipo = request.POST.get('tipo_constancia', 'Constancia Vertical')
-    datos_empleado['tipo_constancia'] = constancia_tipo  # Agregar el tipo de constancia seleccionado
 
-    if request.method == 'POST':
-        return render(request, 'mostrar_constancia.html', datos_empleado)
-    
-    return render(request, 'seleccionar_constancia.html', datos_empleado)
+def ver_constancia(request, tipo):
+    rfc = request.GET.get('rfc')
+    sql = """
+        SELECT NOMBRE, CURP FROM EMPLEADO_COMP WHERE RFC = %s
+    """
+    with connections['personal'].cursor() as cursor:
+        cursor.execute(sql, [rfc])
+        result = cursor.fetchone()
+
+    if not result:
+        return render(request, 'error.html', {'mensaje': 'No se encontró el empleado.'})
+
+    empleado = {"nombre": result[0], "curp": result[1], "rfc": rfc}
+    return render(request, f'constancia_{tipo}.html', {'empleado': empleado})

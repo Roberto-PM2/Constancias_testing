@@ -1,7 +1,8 @@
 FROM debian:bookworm-slim
 
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y \
+# Actualiza e instala dependencias necesarias
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
     apache2 \
     python3 \
     python3-pip \
@@ -10,23 +11,32 @@ RUN apt-get install -y \
     libmariadb-dev \
     libapache2-mod-wsgi-py3 \
     pkg-config \
-    gcc 
+    gcc && \
+    apt-get clean
 
-# Configure timezone
+# Configura la zona horaria
 ENV TZ=America/Mexico_City
-RUN ln -snf  /etc/l/usr/share/zoneinfo/$TZocaltime && echo $TZ > /etc/timezone
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-
-
+# Copia el archivo de requisitos
 COPY ./requirements.txt /app/
 
+# Establece el directorio de trabajo
 WORKDIR /app
 
+# Crea y activa el entorno virtual
 RUN python3 -m venv /env
-RUN . /env/bin/activate
+ENV PATH="/env/bin:$PATH"
 
-#RUN mkdir /app/media && chown :www-data /app/media -R && chmod 775 /app/media -R
-RUN /env/bin/pip install --upgrade pip
-RUN /env/bin/pip install -r /app/requirements.txt
+# Instala las dependencias de Python
+RUN pip install --upgrade pip
+RUN pip install -r /app/requirements.txt
 
+# Copia el resto del código de la aplicación (opcional)
+COPY . /app/
+
+# Expone el puerto para Apache
+EXPOSE 8000
+
+# Comando por defecto para Apache
 CMD ["apachectl", "-D", "FOREGROUND"]

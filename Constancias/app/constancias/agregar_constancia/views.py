@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from .models import (
     Constancia,
@@ -27,9 +28,49 @@ from .forms import (
     ConstanciaBasificacionEstatalForm,
     ConstanciaCambioCentroTrabajoPreparatoriasForm,
 )
+from django.db import connections
+
+#funcion para buscar datos del maestro a partir del rfc
+def getInfo_Empleado_RFC(rfc):
+    """
+    Consulta en la base de datos los datos del empleado a partir del RFC.
+    Retorna un diccionario con los datos del empleado o None si no se encuentra.
+    """
+    sql = """
+        SELECT NOMBRE, CURP FROM EMPLEADO_COMP WHERE RFC = %s
+    """
+    with connections['personal'].cursor() as cursor:
+        cursor.execute(sql, [rfc])
+        result = cursor.fetchone()
+
+    if result:
+        return {"nombre": result[0], "curp": result[1], "rfc": rfc}
+    return None
 
 
-# Vista para calcular la duración entre fechas
+#funcion para obtener datos a partir de la clave del centro de trabajo
+def getInfo_Clave_Centro_Trabajo(claveCT):
+    """
+    Consulta en la base de datos los datos del centro a partir de la clave.
+    Retorna un diccionario con los datos del centro o None si no se encuentra.
+    """
+    sql = """
+        SELECT NOMBRECT, DOMICILIO, MUNICIPIO, LOCALIDAD FROM A_CTBA WHERE CLAVECCT = %s
+    """
+    with connections['personal'].cursor() as cursor:
+        cursor.execute(sql, [claveCT])
+        result = cursor.fetchone()
+
+    if result:
+        return {"nombre": result[0], 
+                "domicilio": result[1], 
+                "municipio": result[2], 
+                "localidad": result[3], 
+                "claveCT": claveCT}
+    return None
+
+
+# Vista para calcular la duración entre fechas para contratos y licencias
 def calcular_duracion(request):
     tipo = request.POST.get('tipo')
     fechas_inicio = request.POST.getlist('fechas_inicio[]')
@@ -53,6 +94,8 @@ def calcular_duracion(request):
         'days': days
     })
 
+#funciones que procesan las claves contratos y licencias dentro del template y las almacenan en
+#tablas asociadas a la constancia
 def procesar_claves(constancia, claves):
     ClavesConstancia.objects.bulk_create([
         ClavesConstancia(constancia=constancia, clave=clave)
@@ -85,7 +128,7 @@ def procesar_licencias(constancia, licencias_adscripcion, licencias_clave_catego
             )
             nueva_licencia.save()
 
-
+#funcion que a partir del id de constancia redirige al tipo de constancia apropiada
 def editar_constancia(request, id_constancia):
     # Obtener la constancia existente
     constancia = Constancia.objects.get(id=id_constancia)
@@ -108,6 +151,44 @@ def editar_constancia(request, id_constancia):
     vista = switch_vistas.get(tipo, None)
     if vista:
         return vista(request, id_constancia)
+    
+    
+# Vista para crear una constancia
+def crear_constancia(request):
+    if request.method == 'POST':
+        rfc = request.POST.get('rfc', '').strip()
+        claveCT = request.POST.get('claveCT', '').strip()
+        tipo_constancia = request.POST.get('tipo_constancia')
+
+        # Consultar la información del empleado
+        #comentar para hacer verificaciones
+        # empleado = getInfoEmpleadoRFC(rfc)
+        # if not empleado:
+        #     return render(request, 'constancias/crear_constancia.html', {'error': "No se encontró un empleado con el RFC ingresado."})
+
+        # Almacenar los parámetros en la sesión
+        request.session['rfc'] = rfc
+        request.session['claveCT'] = claveCT
+        request.session.save()
+
+        # Redirigir a la vista correspondiente según el tipo de constancia
+        switch_urls = {
+            'OTRO': 'nuevoCOM',
+            'PROM_VERTICAL': 'nuevoCPV',
+            'ADMISION': 'nuevoCAdmision',
+            'HORAS_ADIC': 'nuevoCHA',
+            'CAMBIO_CENTRO': 'nuevoCCambioCT',
+            'RECONOCIMIENTO': 'nuevoCReconocimiento',
+            'PROM_HORIZONTAL': 'nuevoCPH',
+            'BASE_ESTATAL': 'nuevoCBE',
+            'CAMBIO_CENTRO_PREP': 'nuevoCCambioCTP',
+        }
+
+        url_name = switch_urls.get(tipo_constancia)
+        if url_name:
+            return redirect(reverse(url_name))
+
+    return render(request, 'constancias/crear_constancia.html')
 
 # Vista para listar constancias
 def lista_constancias(request):
@@ -162,34 +243,6 @@ def cerrar_sesion(request):
     logout(request)
     return redirect('bienvenida')
 
-# Vista para crear una constancia
-@login_required
-def crear_constancia(request):
-    user = request.user
-    configuracion = Configuracion.objects.first()
-    is_usuario_region = user.groups.filter(name="usuario_Region").exists()
-
-    if request.method == "POST":
-        form = ConstanciaForm(request.POST, request.FILES)
-        if form.is_valid():
-            constancia = form.save(commit=False)
-
-            if is_usuario_region:
-                constancia.incluir_logo = True
-                constancia.logo = configuracion.logo if configuracion and configuracion.logo else None
-            else:
-                constancia.incluir_logo = form.cleaned_data.get('incluir_logo', False)
-                constancia.logo = configuracion.logo if configuracion else None
-
-            constancia.save()
-            return redirect('constancia_generada', constancia_id=constancia.id)
-    else:
-        form = ConstanciaForm()
-        if is_usuario_region:
-            form.fields['incluir_logo'].disabled = True
-            form.fields['logo'].disabled = True
-
-    return render(request, 'constancias/crear_constancia.html', {'form': form})
 
 # Vista para generar constancias
 def constancia_generada(request, constancia_id):
@@ -215,13 +268,41 @@ def configurar_logo(request):
         form = ConfiguracionForm(instance=configuracion)
     return render(request, 'constancias/configurar_logo.html', {'form': form})
 
+#funcion que crea un array de datos de acuerdo a las consultas para pasarlos al formulario
+def inicializar_Datos_Form_Constancias(rfc,claveCT):
+    empleado = getInfo_Empleado_RFC(rfc)
+    centroT = getInfo_Clave_Centro_Trabajo(claveCT)
+    if not empleado:
+        return render(request, 'constancias/crear_constancia.html', {'error': "No se encontró un empleado con el RFC ingresado."})
+    if not centroT:
+        return render(request, 'constancias/crear_constancia.html', {'error': "No se encontró un Centro de trabajo"})
+    initial_data = {
+        'nombre_completo':empleado.get('nombre'),
+        'curp':empleado.get('curp'),
+        'filiacion':empleado.get('rfc'),
+        'clave_centro_trabajo':centroT.get('claveCT'),
+        'nombre_centro_trabajo':centroT.get('nombre'),
+        'direccion':centroT.get('domicilio'),
+        'municipio':centroT.get('municipio'),
+        'localidad':centroT.get('localidad'),
+    }
+    return initial_data
+
+#Otro Motivo-----------------------------------------
+
 # Vista para crear constancias de "Otro Motivo"
 @login_required
 def nueva_constanciaOM(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaOtroMotivoForm(request.POST, request.FILES)
+        form = ConstanciaOtroMotivoForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -232,11 +313,7 @@ def nueva_constanciaOM(request):
 
             constancia.save()
 
-            claves = request.POST.getlist('claves[]')
-            ClavesConstancia.objects.bulk_create([
-                ClavesConstancia(constancia=constancia, clave=clave)
-                for clave in claves if clave.strip()
-            ])
+            procesar_claves(constancia, request.POST.getlist('claves[]'))
 
             if is_usuario_region:
                 constancia.incluir_logo = True
@@ -247,7 +324,7 @@ def nueva_constanciaOM(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaOtroMotivoForm()
+        form = ConstanciaOtroMotivoForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -271,11 +348,7 @@ def editar_constanciaOM(request, id_constancia):
             constancia = form.save()
             claves_existentes.delete()
 
-            claves = request.POST.getlist('claves[]')
-            ClavesConstancia.objects.bulk_create([
-                ClavesConstancia(constancia=constancia, clave=clave)
-                for clave in claves if clave.strip()
-            ])
+            procesar_claves(constancia, request.POST.getlist('claves[]'))
 
             if is_usuario_region:
                 constancia.incluir_logo = True
@@ -303,8 +376,14 @@ def editar_constanciaOM(request, id_constancia):
 def nueva_constanciaPV(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaPromocionVerticalForm(request.POST, request.FILES)
+        form = ConstanciaPromocionVerticalForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -340,7 +419,7 @@ def nueva_constanciaPV(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaPromocionVerticalForm()
+        form = ConstanciaPromocionVerticalForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -412,8 +491,14 @@ def editar_constanciaPV(request, id_constancia):
 def nueva_constanciaAdmision(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaAdmisionForm(request.POST, request.FILES)
+        form = ConstanciaAdmisionForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -441,7 +526,7 @@ def nueva_constanciaAdmision(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaAdmisionForm()
+        form = ConstanciaAdmisionForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -502,8 +587,13 @@ def editar_constanciaAdmision(request, id_constancia):
 def nueva_constanciaHA(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaHorasAdicionalesForm(request.POST, request.FILES)
+        form = ConstanciaHorasAdicionalesForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -539,7 +629,7 @@ def nueva_constanciaHA(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaHorasAdicionalesForm()
+        form = ConstanciaHorasAdicionalesForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -611,8 +701,13 @@ def editar_constanciaHA(request, id_constancia):
 def nueva_constanciaCambioCT(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaCambioCentroTrabajoForm(request.POST, request.FILES)
+        form = ConstanciaCambioCentroTrabajoForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -648,7 +743,7 @@ def nueva_constanciaCambioCT(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaCambioCentroTrabajoForm()
+        form = ConstanciaCambioCentroTrabajoForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -720,8 +815,14 @@ def editar_constanciaCambioCT(request, id_constancia):
 def nueva_constanciaReconocimiento(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaReconocimientoForm(request.POST, request.FILES)
+        form = ConstanciaReconocimientoForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -757,7 +858,7 @@ def nueva_constanciaReconocimiento(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaReconocimientoForm()
+        form = ConstanciaReconocimientoForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -829,8 +930,14 @@ def editar_constanciaReconocimiento(request, id_constancia):
 def nueva_constanciaPH(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaPromocionHorizontalForm(request.POST, request.FILES)
+        form = ConstanciaPromocionHorizontalForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -866,7 +973,7 @@ def nueva_constanciaPH(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaPromocionHorizontalForm()
+        form = ConstanciaPromocionHorizontalForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -938,8 +1045,14 @@ def editar_constanciaPH(request, id_constancia):
 def nueva_constanciaBE(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaBasificacionEstatalForm(request.POST, request.FILES)
+        form = ConstanciaBasificacionEstatalForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -967,7 +1080,7 @@ def nueva_constanciaBE(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaBasificacionEstatalForm()
+        form = ConstanciaBasificacionEstatalForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -1028,8 +1141,14 @@ def editar_constanciaBE(request, id_constancia):
 def nueva_constanciaCambioCTP(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
+
+    # Obtener los valores de la sesión
+    rfc = request.session.get('rfc')
+    claveCT = request.session.get('claveCT')
+    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+
     if request.method == 'POST':
-        form = ConstanciaCambioCentroTrabajoPreparatoriasForm(request.POST, request.FILES)
+        form = ConstanciaCambioCentroTrabajoPreparatoriasForm(request.POST, request.FILES, initial=initial_data)
         if form.is_valid():
             constancia = form.save(commit=False)
             constancia.usuario = request.user
@@ -1065,7 +1184,7 @@ def nueva_constanciaCambioCTP(request):
 
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
-        form = ConstanciaCambioCentroTrabajoPreparatoriasForm()
+        form = ConstanciaCambioCentroTrabajoPreparatoriasForm(initial=initial_data)
         if is_usuario_region:
             form.fields['incluir_logo'].disabled = True
             form.fields['logo'].disabled = True
@@ -1130,3 +1249,34 @@ def editar_constanciaCambioCTP(request, id_constancia):
     }
 
     return render(request, 'constancias/nueva_constanciaCambioCTP.html', context)
+
+
+#crear constancia viejo
+
+# @login_required
+# def crear_constancia(request):
+#     user = request.user
+#     configuracion = Configuracion.objects.first()
+#     is_usuario_region = user.groups.filter(name="usuario_Region").exists()
+
+#     if request.method == "POST":
+#         form = ConstanciaForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             constancia = form.save(commit=False)
+
+#             if is_usuario_region:
+#                 constancia.incluir_logo = True
+#                 constancia.logo = configuracion.logo if configuracion and configuracion.logo else None
+#             else:
+#                 constancia.incluir_logo = form.cleaned_data.get('incluir_logo', False)
+#                 constancia.logo = configuracion.logo if configuracion else None
+
+#             constancia.save()
+#             return redirect('constancia_generada', constancia_id=constancia.id)
+#     else:
+#         form = ConstanciaForm()
+#         if is_usuario_region:
+#             form.fields['incluir_logo'].disabled = True
+#             form.fields['logo'].disabled = True
+
+#     return render(request, 'constancias/crear_constancia.html', {'form': form})

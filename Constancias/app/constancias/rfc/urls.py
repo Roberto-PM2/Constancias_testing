@@ -1,12 +1,7 @@
 from django.urls import path
 from . import views
 
-
-# app/constancias/rfc/urls.py
-from rfc import views
-
 urlpatterns = [
-    path('verificar_rfc/', views.verificar_rfc, name='verificar_rfc'),
-    path('seleccionar_constancia/', views.seleccionar_constancia, name='seleccionar_constancia'),
+    path('', views.ingresar_rfc, name='ingresar_rfc'),
+    path('constancia/<str:tipo>/', views.ver_constancia, name='ver_constancia'),
 ]
-

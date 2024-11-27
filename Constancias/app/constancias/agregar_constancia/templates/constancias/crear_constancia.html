@@ -1,14 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Crear Constancia</h2>
-{% load static %}
-<form method="post" enctype="multipart/form-data">
+
+<form method="post" action="{% url 'crear_constancia' %}">
     {% csrf_token %}
-    {{ form.as_p }}
-    {% if configuracion and configuracion.logo %}
-        <p>Logo actual:</p>
-        <img src="{{ configuracion.logo.url }}" alt="Logo actual" style="max-width: 200px;">
-    {% endif %}
+    <div>
+        <label for="rfc">RFC:</label>
+        <input type="text" id="rfc" name="rfc" required>
+    </div>
+    <div>
+        <label for="clave_centro_trabajo">Clave Centro de Trabajo Actual:</label>
+        <input type="text" id="claveCT" name="claveCT" required>
+    </div>
+    <div>
+        <label for="tipo_constancia">Tipo de Constancia:</label>
+        <select id="tipo_constancia" name="tipo_constancia" required>
+            <option value="">Seleccione una opción</option>
+            <option value="OTRO">Otro Motivo</option>
+            <option value="PROM_VERTICAL">Promoción Vertical</option>
+            <option value="ADMISION">Admisión</option>
+            <option value="HORAS_ADIC">Horas Adicionales</option>
+            <option value="CAMBIO_CENTRO">Cambios de Centro de Trabajo</option>
+            <option value="RECONOCIMIENTO">Reconocimiento</option>
+            <option value="PROM_HORIZONTAL">Promoción Horizontal</option>
+            <option value="BASE_ESTATAL">Basificación estatal</option>
+            <option value="CAMBIO_CENTRO_PREP">Cambios de Centro de Trabajo nivel preparatoria</option>
+        </select>
+    </div>
     <button type="submit">Crear Constancia</button>
 </form>
+
 {% endblock %}
