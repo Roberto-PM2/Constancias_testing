@@ -46,9 +46,6 @@ function getNominaFederal($busca = ''){
 		return $datos;
 }
 
-
-buscan nominas de cheques? 
-//busqueda de empledo
 				$objEmp = getNominaFederal($busca);
 				$qnaControlFed = ($objEmp) ? $objEmp->MAX : 0 ;
 				

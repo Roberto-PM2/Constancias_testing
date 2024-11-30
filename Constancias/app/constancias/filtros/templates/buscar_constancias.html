@@ -25,7 +25,9 @@
             display: block;
             font-weight: bold;
         }
-        .form-group input[type="text"], .form-group input[type="date"] {
+        .form-group input[type="text"], 
+        .form-group input[type="date"], 
+        .form-group select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
@@ -58,6 +60,12 @@
             padding: 15px;
             margin-bottom: 10px;
             border: 1px solid #ddd;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -93,7 +101,15 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
+            <div class="form-group">
+                <label for="activa">Activa</label>
+                <select id="activa" name="activa">
+                    <option value="">Seleccionar...</option>
+                    <option value="true" {% if activa == 'true' %}selected{% endif %}>Activa</option>
+                    <option value="false" {% if activa == 'false' %}selected{% endif %}>Inactiva</option>
+                </select>
+            </div>
 
             <div class="form-actions">
                 <button type="submit" id="btnBuscar">Buscar</button>
@@ -112,31 +128,22 @@
                             <li class="result-item">
                                 <strong>Nombre:</strong> {{ constancia.nombre_completo }}<br>
                                 <strong>Fecha de Emisión:</strong> {{ constancia.fecha_creacion_constancia }}<br>
-                                <strong>RFC:</strong> {{ constancia.filiacion }} <br>
-                                <!-- Botón para redirigir a la URL de edición -->
+                                <strong>RFC:</strong> {{ constancia.filiacion }}<br>
+                                <strong>Activa:</strong> {{ constancia.Activa|yesno:"Sí,No" }}<br>
                                 <a href="{% url 'editar_constancia' constancia.id %}">
                                     <button type="button">Editar Constancia</button>
                                 </a>
                             </li>
                         {% endfor %}
-                        
                     </ul>
                 {% else %}
-                    <p id="mensaje_error">No se encontraron constancias que coincidan con los filtros aplicados.</p>
+                    <p>No se encontraron constancias que coincidan con los filtros aplicados.</p>
                 {% endif %}
             {% endif %}
-            
         </div>
     </div>
 
     <script>
-        function resetForm() {
-            document.getElementById("nombre").value = "";
-            document.getElementById("fecha_emision").value = "";
-            document.getElementById("rfc").value = "";
-            document.getElementById("tipo_constancia").value = "";
-        }
-
         function validarRFC(rfc) {
             const regexRFC = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
             return regexRFC.test(rfc);
@@ -154,10 +161,6 @@
                 rfcError.style.display = "none";
             }
         });
-
     </script>
-
-</script>
-
 </body>
 </html>

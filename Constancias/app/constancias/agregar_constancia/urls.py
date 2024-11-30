@@ -21,6 +21,7 @@ urlpatterns = [
     path('nuevoCCambioCTP/', views.nueva_constanciaCambioCTP, name='nuevoCCambioCTP'),
 
     path('lista/', views.lista_constancias, name='lista_constancias'),
+    path('estado-constancia/<int:id_constancia>', views.cambiar_estado, name='cambiar_estado'),
     path('eliminar-constancia/<int:id_constancia>', views.eliminar_constancia, name='eliminar_constancia'),
     path('editar-constancia/<int:id_constancia>', views.editar_constancia, name='editar_constancia'),
     path('calcular_duracion/', views.calcular_duracion, name='calcular_duracion'),

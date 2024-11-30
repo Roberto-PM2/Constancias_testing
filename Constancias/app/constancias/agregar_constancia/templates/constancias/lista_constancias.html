@@ -15,7 +15,10 @@
                 <th>Nombre Completo</th>
                 <th>tipo</th>
                 <th>Fecha de creacion</th>
-                <th>Acciones</th>
+                {% if user.is_staff %}
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody id="tbResultados">
@@ -26,10 +29,28 @@
                     <td>{{ constancia.nombre_completo }}</td>
                     <td>{{ constancia.tipo_constancia }}</td>
                     <td>{{ constancia.fecha_creacion_constancia }}</td>
-                    <td>
-                        <a href="{% url 'eliminar_constancia' constancia.id %}">Eliminar</a> |
-                        <a href="{% url 'editar_constancia' constancia.id %}">Editar</a>
-                    </td>
+                    {% if user.is_staff %}
+                        <td id="estado-{{ constancia.id }}">
+                            {% if constancia.Activa %}
+                                Activa
+                            {% else %}
+                                Inactiva
+                            {% endif %}
+                        </td>
+                        
+                        <td>
+                            <a href="{% url 'cambiar_estado' constancia.id %}">
+                                {% if constancia.Activa %}
+                                    Desactivar
+                                {% else %}
+                                    Activar
+                                {% endif %}
+                            </a> 
+                            <a href="{% url 'eliminar_constancia' constancia.id %}">Eliminar</a> |
+                            <a href="{% url 'editar_constancia' constancia.id %}">Editar</a>
+                        </td>
+                    {% endif %}
+                    
                 </tr>
             {% endfor %}
         </tbody>

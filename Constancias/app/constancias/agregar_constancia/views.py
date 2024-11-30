@@ -195,6 +195,14 @@ def lista_constancias(request):
     constancias = Constancia.objects.all()
     return render(request, 'constancias/lista_constancias.html', {'constancias': constancias})
 
+# vista para activar/desactivar constancias
+def cambiar_estado(request, id_constancia):
+    #constancia = Constancia.objects.filter(id=id_constancia)
+    constancia = get_object_or_404(Constancia, id=id_constancia)
+    constancia.Activa = not constancia.Activa
+    constancia.save()
+    return redirect('lista_constancias')
+
 # Vista para eliminar constancias
 def eliminar_constancia(request, id_constancia):
     Constancia.objects.filter(id=id_constancia).delete()
