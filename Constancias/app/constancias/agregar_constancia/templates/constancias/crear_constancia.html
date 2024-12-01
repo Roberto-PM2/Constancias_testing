@@ -16,15 +16,11 @@
         <label for="tipo_constancia">Tipo de Constancia:</label>
         <select id="tipo_constancia" name="tipo_constancia" required>
             <option value="">Seleccione una opción</option>
-            <option value="OTRO">Otro Motivo</option>
-            <option value="PROM_VERTICAL">Promoción Vertical</option>
-            <option value="ADMISION">Admisión</option>
-            <option value="HORAS_ADIC">Horas Adicionales</option>
-            <option value="CAMBIO_CENTRO">Cambios de Centro de Trabajo</option>
-            <option value="RECONOCIMIENTO">Reconocimiento</option>
-            <option value="PROM_HORIZONTAL">Promoción Horizontal</option>
-            <option value="BASE_ESTATAL">Basificación estatal</option>
-            <option value="CAMBIO_CENTRO_PREP">Cambios de Centro de Trabajo nivel preparatoria</option>
+            {% for tipo, nombre in tipos_constancia %}
+                {% if tipo in constancias_habilitadas %}
+                    <option value="{{ tipo }}">{{ nombre }}</option>
+                {% endif %}
+            {% endfor %}
         </select>
     </div>
     <button type="submit">Crear Constancia</button>

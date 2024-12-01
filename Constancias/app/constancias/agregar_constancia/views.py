@@ -13,6 +13,7 @@ from .models import (
     ClavesConstancia,
     ContratoConstancia,
     LicenciaConstancia,
+    ConstanciaAccessControl
 )
 from .forms import (
     ConstanciaForm,
@@ -29,6 +30,8 @@ from .forms import (
     ConstanciaCambioCentroTrabajoPreparatoriasForm,
 )
 from django.db import connections
+
+from .decorators import verificar_acceso_constancia
 
 #funcion para buscar datos del maestro a partir del rfc
 def getInfo_Empleado_RFC(rfc):
@@ -152,6 +155,18 @@ def editar_constancia(request, id_constancia):
     if vista:
         return vista(request, id_constancia)
     
+#lista tipos constancia
+TIPOS_CONSTANCIA = [
+    ('OTRO', 'Otro Motivo'),
+    ('PROM_VERTICAL', 'Promoción Vertical'),
+    ('ADMISION', 'Admisión'),
+    ('HORAS_ADIC', 'Horas Adicionales'),
+    ('CAMBIO_CENTRO', 'Cambios de Centro de Trabajo'),
+    ('RECONOCIMIENTO', 'Reconocimiento'),
+    ('PROM_HORIZONTAL', 'Promoción Horizontal'),
+    ('BASE_ESTATAL', 'Basificación estatal'),
+    ('CAMBIO_CENTRO_PREP', 'Cambios de Centro de Trabajo nivel preparatoria'),
+]
     
 # Vista para crear una constancia
 def crear_constancia(request):
@@ -188,7 +203,14 @@ def crear_constancia(request):
         if url_name:
             return redirect(reverse(url_name))
 
-    return render(request, 'constancias/crear_constancia.html')
+     # Obtener los tipos de constancia habilitados
+    constancias_habilitadas = ConstanciaAccessControl.objects.filter(habilitado=True).values_list('tipo_constancia', flat=True)
+
+    return render(request, 'constancias/crear_constancia.html', {
+        'constancias_habilitadas': constancias_habilitadas,
+        'tipos_constancia': TIPOS_CONSTANCIA,
+    })
+    
 
 # Vista para listar constancias
 def lista_constancias(request):
@@ -299,7 +321,9 @@ def inicializar_Datos_Form_Constancias(rfc,claveCT):
 #Otro Motivo-----------------------------------------
 
 # Vista para crear constancias de "Otro Motivo"
+#cada tipo de constancia tiene su respectivo decorador para verificar permisos de acceso
 @login_required
+@verificar_acceso_constancia('OTRO')
 def nueva_constanciaOM(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -344,6 +368,8 @@ def nueva_constanciaOM(request):
     return render(request, 'constancias/nueva_constanciaOM.html', context)
 
 # Vista para editar constancias de "Otro Motivo"
+@login_required
+@verificar_acceso_constancia('OTRO')
 def editar_constanciaOM(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -381,6 +407,7 @@ def editar_constanciaOM(request, id_constancia):
 #promocion vertical-------------------------------
 
 @login_required
+@verificar_acceso_constancia('PROM_VERTICAL')
 def nueva_constanciaPV(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -438,6 +465,8 @@ def nueva_constanciaPV(request):
     }
     return render(request, 'constancias/nueva_constanciaPV.html', context)
 
+@login_required
+@verificar_acceso_constancia('PROM_VERTICAL')
 def editar_constanciaPV(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -496,6 +525,7 @@ def editar_constanciaPV(request, id_constancia):
 #Admision-------------------------------
 
 @login_required
+@verificar_acceso_constancia('ADMISION')
 def nueva_constanciaAdmision(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -545,6 +575,8 @@ def nueva_constanciaAdmision(request):
     }
     return render(request, 'constancias/nueva_constanciaAdmision.html', context)
 
+@login_required
+@verificar_acceso_constancia('ADMISION')
 def editar_constanciaAdmision(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -592,6 +624,7 @@ def editar_constanciaAdmision(request, id_constancia):
 #Horas Adicionales-------------------------------
 
 @login_required
+@verificar_acceso_constancia('HORAS_ADIC')
 def nueva_constanciaHA(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -648,6 +681,9 @@ def nueva_constanciaHA(request):
     }
     return render(request, 'constancias/nueva_constanciaHA.html', context)
 
+
+@login_required
+@verificar_acceso_constancia('HORAS_ADIC')
 def editar_constanciaHA(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -706,6 +742,7 @@ def editar_constanciaHA(request, id_constancia):
 #Cambio Centro Trabajo-------------------------------
 
 @login_required
+@verificar_acceso_constancia('CAMBIO_CENTRO')
 def nueva_constanciaCambioCT(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -762,6 +799,9 @@ def nueva_constanciaCambioCT(request):
     }
     return render(request, 'constancias/nueva_constanciaCambioCT.html', context)
 
+
+@login_required
+@verificar_acceso_constancia('CAMBIO_CENTRO')
 def editar_constanciaCambioCT(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -820,6 +860,7 @@ def editar_constanciaCambioCT(request, id_constancia):
 #Reconocimiento-------------------------------
 
 @login_required
+@verificar_acceso_constancia('RECONOCIMIENTO')
 def nueva_constanciaReconocimiento(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -877,6 +918,9 @@ def nueva_constanciaReconocimiento(request):
     }
     return render(request, 'constancias/nueva_constanciaReconocimiento.html', context)
 
+
+@login_required
+@verificar_acceso_constancia('RECONOCIMIENTO')
 def editar_constanciaReconocimiento(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -935,6 +979,7 @@ def editar_constanciaReconocimiento(request, id_constancia):
 #Promocion Horizontal-------------------------------
 
 @login_required
+@verificar_acceso_constancia('PROM_HORIZONTAL')
 def nueva_constanciaPH(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -992,6 +1037,8 @@ def nueva_constanciaPH(request):
     }
     return render(request, 'constancias/nueva_constanciaPH.html', context)
 
+@login_required
+@verificar_acceso_constancia('PROM_HORIZONTAL')
 def editar_constanciaPH(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -1050,6 +1097,7 @@ def editar_constanciaPH(request, id_constancia):
 #Basificacion Estatal-------------------------------
 
 @login_required
+@verificar_acceso_constancia('BASE_ESTATAL')
 def nueva_constanciaBE(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -1099,6 +1147,9 @@ def nueva_constanciaBE(request):
     }
     return render(request, 'constancias/nueva_constanciaBE.html', context)
 
+
+@login_required
+@verificar_acceso_constancia('BASE_ESTATAL')
 def editar_constanciaBE(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
@@ -1146,6 +1197,7 @@ def editar_constanciaBE(request, id_constancia):
 #Cambio Centro Trabajo Preparatorias-------------------------------
 
 @login_required
+@verificar_acceso_constancia('CAMBIO_CENTRO_PREP')
 def nueva_constanciaCambioCTP(request):
     configuracion = Configuracion.objects.first()
     is_usuario_region = request.user.groups.filter(name="usuario_Region").exists()
@@ -1203,6 +1255,9 @@ def nueva_constanciaCambioCTP(request):
     }
     return render(request, 'constancias/nueva_constanciaCambioCTP.html', context)
 
+
+@login_required
+@verificar_acceso_constancia('CAMBIO_CENTRO_PREP')
 def editar_constanciaCambioCTP(request, id_constancia):
     configuracion = Configuracion.objects.first()
     constancia = get_object_or_404(Constancia, id=id_constancia)
