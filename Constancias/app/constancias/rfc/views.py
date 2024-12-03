@@ -5,11 +5,12 @@ import re
 
 def validar_rfc(rfc):
     """Valida que el RFC tenga 13 caracteres y no contenga caracteres especiales."""
-    if len(rfc) != 13:
-        return False, "El RFC debe tener 13 caracteres."
     if not re.match(r"^[A-Za-z0-9]+$", rfc):
         return False, "El RFC no debe contener caracteres especiales."
+    if len(rfc) != 13:
+        return False, "El RFC debe tener 13 caracteres."
     return True, ""
+
 
 
 def ingresar_rfc(request):

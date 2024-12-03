@@ -169,6 +169,7 @@ TIPOS_CONSTANCIA = [
 ]
     
 # Vista para crear una constancia
+@login_required
 def crear_constancia(request):
     if request.method == 'POST':
         rfc = request.POST.get('rfc', '').strip()

@@ -96,19 +96,22 @@ DATABASES = {
     'personal': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME2', default=None),
-        'USER' : os.environ.get('DB_USER2', default=None),
-        'PASSWORD' : os.environ.get('DB_PASSWORD2', default=None),
+        'USER': os.environ.get('DB_USER2', default=None),
+        'PASSWORD': os.environ.get('DB_PASSWORD2', default=None),
         'HOST': os.environ.get('DB_HOST2', default='local'),
         'PORT': 3306,
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
+        'TEST': {
+            'MIRROR': 'personal',  # Indica que use la base de datos real
+        },
     },
     'consulta_cheque': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME3', default=None),
-        'USER' : os.environ.get('DB_USER3', default=None),
-        'PASSWORD' : os.environ.get('DB_PASSWORD3', default=None),
+        'USER': os.environ.get('DB_USER3', default=None),
+        'PASSWORD': os.environ.get('DB_PASSWORD3', default=None),
         'HOST': os.environ.get('DB_HOST3', default='local'),
         'PORT': 3306,
         'OPTIONS': {
@@ -116,7 +119,6 @@ DATABASES = {
         },
     },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
