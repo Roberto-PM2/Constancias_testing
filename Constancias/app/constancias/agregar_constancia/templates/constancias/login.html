@@ -1,13 +1,98 @@
-<h1>Iniciar sesión</h1>
-<form method="POST">
-    {% if error %}
-    <p style='color: red;'>{{ error }}</p>
-    {%endif %}
-    {% csrf_token %}
-    <label for="username">Usuario:</label>
-    <input type="text" name="username" id="username" required>
-    <label for="password">Contraseña:</label>
-    <input type="password" name="password" id="password" required>
-    <button type="submit">Iniciar sesión</button>
-</form>
-<p>¿No tienes una cuenta? <a href="{% url 'registrarse' %}">Regístrate</a></p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #ca5363;
+            margin-bottom: 20px;
+        }
+        form {
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ca5363;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ca5363;
+        }
+        p {
+            margin-top: 15px;
+        }
+        a {
+            color: #ca5363;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #ca5363;
+        }
+        .error {
+            color: red;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Iniciar Sesión</h1>
+        <form method="POST">
+            {% if error %}
+            <p class="error">{{ error }}</p>
+            {% endif %}
+            {% csrf_token %}
+            <label for="username">Usuario:</label>
+            <input type="text" name="username" id="username" required>
+            <label for="password">Contraseña:</label>
+            <input type="password" name="password" id="password" required>
+            <button type="submit">Iniciar sesión</button>
+        </form>
+        <p>¿No tienes una cuenta? <a href="{% url 'registrarse' %}">Regístrate</a></p>
+    </div>
+</body>
+</html>

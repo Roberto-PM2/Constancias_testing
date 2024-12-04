@@ -2,9 +2,12 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
 from datetime import datetime
+from agregar_constancia.forms import RegistroForm
+
+
 
 from constancias import settings
-from .models import (
+from ..models import (
     Constancia,
     ClavesConstancia,
     LicenciaConstancia,
@@ -12,7 +15,7 @@ from .models import (
     Configuracion,
     ConstanciaAccessControl
 )
-from .forms import (
+from ..forms import (
     ConstanciaOtroMotivoForm,
     ConstanciaPromocionVerticalForm,
     ConstanciaAdmisionForm,
@@ -1314,4 +1317,138 @@ class TestViewsLogin(TestCase):
         })
         self.assertFalse(User.objects.filter(username='newuser2').exists())  # Verifica que el usuario no fue creado
         self.assertTemplateUsed(response, 'constancias/registro.html')
+######
+    def test_titulo_se_encuentra_en_el_template_login(self):
+        response = self.client.get(reverse('login'))
+        self.assertContains(response, '<h1>Inicio de Sesión</h1>')
 
+    def test_campo_usuario_se_encuentra_en_el_template(self):
+        response = self.client.get(reverse('login'))
+        self.assertContains(response, '<input type="text" name="username">')
+    
+    def test_campo_password_se_encuentra_en_el_template(self):
+        response = self.client.get(reverse('login'))
+        self.assertContains(response, '<input type="password" name="password">')
+
+    def test_iniciar_sesion(self):
+        User.objects.create_user(username='usuario', password='password123')
+        data = {'username': 'usuario', 'password': 'password123'}
+        response = self.client.post(reverse('login'), data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_form_login_invalido(self):
+        data = {'username': 'usuario_inexistente', 'password': 'password'}
+        response = self.client.post(reverse('login'), data)
+        self.assertEqual(response.status_code, 401)  # Código para error de autenticación
+
+    def test_form_login_invalido_mensaje(self):
+        data = {'username': 'usuario_inexistente', 'password': 'password'}
+        response = self.client.post(reverse('login'), data)
+        self.assertContains(response, 'Credenciales inválidas')
+
+    def test_login_username_nulo(self):
+        data = {'username': '', 'password': 'password123'}
+        response = self.client.post(reverse('login'), data)
+        self.assertContains(response, 'El campo usuario es obligatorio.')
+
+    def test_login_password_nulo(self):
+        data = {'username': 'usuario', 'password': ''}
+        response = self.client.post(reverse('login'), data)
+        self.assertContains(response, 'El campo contraseña es obligatorio.')
+
+    def test_iniciar_sesion_success(self):
+        User.objects.create_user(username='usuario', password='password123')
+        data = {'username': 'usuario', 'password': 'password123'}
+        response = self.client.post(reverse('login'), data)
+        self.assertRedirects(response, reverse('dashboard'))  # Asumiendo que redirige al dashboard
+
+    def test_iniciar_sesion_failure(self):
+        data = {'username': 'usuario', 'password': 'incorrect_password'}
+        response = self.client.post(reverse('login'), data)
+        self.assertContains(response, 'Credenciales inválidas')
+
+    def test_redirige_despues_de_iniciar_sesion(self):
+        User.objects.create_user(username='usuario', password='password123')
+        data = {'username': 'usuario', 'password': 'password123'}
+        response = self.client.post(reverse('login'), data)
+        self.assertRedirects(response, reverse('dashboard'))
+
+class UsuarioFormTests(TestCase):
+
+    def test_muestra_formulario_crear_cuenta(self):
+        form = RegistroForm()
+        self.assertIn('nombre', form.fields)
+        self.assertIn('password', form.fields)
+        self.assertIn('password_re', form.fields)
+
+    def test_usuario_form_valido(self):
+        form_data = {
+            'nombre': 'usuario_valido',
+            'password': 'Contraseña123!',
+            'password_re': 'Contraseña123!',
+        }
+        form = RegistroForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_usuario_form_nombre_vacio(self):
+        form_data = {'nombre': '', 'password': 'Contraseña123!', 'password_re': 'Contraseña123!'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_usuario_form_nombre_invalido_mensaje(self):
+        form_data = {'nombre': '', 'password': 'Contraseña123!', 'password_re': 'Contraseña123!'}
+        form = RegistroForm(data=form_data)
+        form.is_valid()
+        self.assertIn('Este campo es obligatorio.', form.errors['nombre'])
+
+    def test_usuario_form_password_invalido(self):
+        form_data = {'nombre': 'usuario', 'password': '123', 'password_re': '123'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_usuario_form_password_invalido_mensaje(self):
+        form_data = {'nombre': 'usuario', 'password': '123', 'password_re': '123'}
+        form = RegistroForm(data=form_data)
+        form.is_valid()
+        self.assertIn('La contraseña es demasiado corta.', form.errors['password'])
+
+    def test_usuario_form_password_re_requerido(self):
+        form_data = {'nombre': 'usuario', 'password': 'Contraseña123!', 'password_re': ''}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_usuario_form_password_re_con_espacios(self):
+        form_data = {'nombre': 'usuario', 'password': 'Contraseña 123!', 'password_re': 'Contraseña 123!'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_usuario_form_password_re_formato_invalido(self):
+        form_data = {'nombre': 'usuario', 'password': 'password', 'password_re': 'password'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_usuario_form_password_re_diferente_a_password(self):
+        form_data = {'nombre': 'usuario', 'password': 'Contraseña123!', 'password_re': 'Diferente123!'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_nombre_usuario_no_acepta_caracteres_especiales(self):
+        form_data = {'nombre': 'usuario!@#$', 'password': 'Contraseña123!', 'password_re': 'Contraseña123!'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_nombre_usuario_no_acepta_numeros(self):
+        form_data = {'nombre': 'usuario123', 'password': 'Contraseña123!', 'password_re': 'Contraseña123!'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_usuario_duplicado(self):
+        self.user = User.objects.create(nombre='usuario', password='Contraseña123!')
+        form_data = {'nombre': 'usuario', 'password': 'Contraseña123!', 'password_re': 'Contraseña123!'}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_password_es_requerido(self):
+        form_data = {'nombre': 'usuario', 'password': '', 'password_re': ''}
+        form = RegistroForm(data=form_data)
+        self.assertFalse(form.is_valid())

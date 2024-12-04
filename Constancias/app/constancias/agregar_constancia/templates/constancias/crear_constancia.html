@@ -1,29 +1,95 @@
 {% extends 'base.html' %}
-{% block content %}
-<h2>Crear Constancia</h2>
 
-<form method="post" action="{% url 'crear_constancia' %}">
-    {% csrf_token %}
-    <div>
+{% block content %}
+
+    
+<style>
+    .form-container {
+      width: 100%;
+      max-width: 400px;  /* Ajustado a 400px para que no ocupe toda la pantalla */
+      margin: 50px auto;  /* Centramos el formulario verticalmente */
+      padding: 30px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  
+    h2 {
+      color: #ca5363;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  
+    .form-group {
+      margin-bottom: 15px;
+    }
+  
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+  
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #ca5363;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    button:hover {
+      background-color: #db243d;
+    }
+  
+    option {
+      font-size: 14px;
+    }
+  </style>
+
+  <div class="form-container">
+    <h2>Crear Constancia</h2>
+
+    <form method="post" action="{% url 'crear_constancia' %}">
+      {% csrf_token %}
+      
+      <div class="form-group">
         <label for="rfc">RFC:</label>
         <input type="text" id="rfc" name="rfc" required>
-    </div>
-    <div>
+      </div>
+      
+      <div class="form-group">
         <label for="clave_centro_trabajo">Clave Centro de Trabajo Actual:</label>
         <input type="text" id="claveCT" name="claveCT" required>
-    </div>
-    <div>
+      </div>
+      
+      <div class="form-group">
         <label for="tipo_constancia">Tipo de Constancia:</label>
         <select id="tipo_constancia" name="tipo_constancia" required>
-            <option value="">Seleccione una opción</option>
-            {% for tipo, nombre in tipos_constancia %}
-                {% if tipo in constancias_habilitadas %}
-                    <option value="{{ tipo }}">{{ nombre }}</option>
-                {% endif %}
-            {% endfor %}
+          <option value="">Seleccione una opción</option>
+          {% for tipo, nombre in tipos_constancia %}
+            {% if tipo in constancias_habilitadas %}
+              <option value="{{ tipo }}">{{ nombre }}</option>
+            {% endif %}
+          {% endfor %}
         </select>
-    </div>
-    <button type="submit">Crear Constancia</button>
-</form>
-
+      </div>
+      
+      <button type="submit">Crear Constancia</button>
+    </form>
+  </div>
 {% endblock %}
+

@@ -3,6 +3,7 @@ from .models import Configuracion,Constancia,Configuracion
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+
 class ConstanciaForm(forms.ModelForm):
     class Meta:
         model = Constancia

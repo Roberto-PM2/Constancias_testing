@@ -2,7 +2,11 @@
 #from decouple import config
 from pathlib import Path
 import os
+import sys
 from django.contrib.messages import constants as messages
+
+
+
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
@@ -83,6 +87,7 @@ WSGI_APPLICATION = 'constancias.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -96,22 +101,19 @@ DATABASES = {
     'personal': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME2', default=None),
-        'USER': os.environ.get('DB_USER2', default=None),
-        'PASSWORD': os.environ.get('DB_PASSWORD2', default=None),
+        'USER' : os.environ.get('DB_USER2', default=None),
+        'PASSWORD' : os.environ.get('DB_PASSWORD2', default=None),
         'HOST': os.environ.get('DB_HOST2', default='local'),
         'PORT': 3306,
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
-        'TEST': {
-            'MIRROR': 'personal',  # Indica que use la base de datos real
-        },
     },
     'consulta_cheque': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME3', default=None),
-        'USER': os.environ.get('DB_USER3', default=None),
-        'PASSWORD': os.environ.get('DB_PASSWORD3', default=None),
+        'USER' : os.environ.get('DB_USER3', default=None),
+        'PASSWORD' : os.environ.get('DB_PASSWORD3', default=None),
         'HOST': os.environ.get('DB_HOST3', default='local'),
         'PORT': 3306,
         'OPTIONS': {
@@ -119,6 +121,7 @@ DATABASES = {
         },
     },
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -175,3 +178,8 @@ LOGOUT_REDIRECT_URL = 'login'
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
