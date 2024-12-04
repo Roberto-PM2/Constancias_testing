@@ -27,14 +27,17 @@
     <div class="printable-area">
         <h1>Constancia</h1>
         {% if constancia.logo %}
-            <img src="{{ constancia.logo.url }}" alt="Logo de la constancia" style="width: 100px; height: auto;">
-        {% endif %}
+    <div>
+        <img id="logo-constancia" src="{{ constancia.logo.url }}" alt="Logo Institucional" style="max-width: 200px;">
+    </div>
+{% endif %}
         <p>Nombre: {{ constancia.nombre }}</p>
     </div>
 
     <div class="no-print">
-        <button onclick="window.print()">Imprimir</button>
-        <a href="{% url 'crear_constancia' %}" class="button">Generar otra constancia</a>
+        <button id="boton-imprimir" onclick="alert('Constancia enviada a imprimir')">Imprimir</button>
+        <!--<button id="boton-imprimir" onclick="window.print()">Imprimir</button>-->
+        <a id="Generar_otra _constancia" href="{% url 'crear_constancia' %}" class="button">Generar otra constancia</a>
     </div>
 </body>
 </html>

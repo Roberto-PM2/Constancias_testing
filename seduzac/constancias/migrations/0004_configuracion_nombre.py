@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='configuracion',
             name='nombre',
-            field=models.CharField(default='Configuracion global', max_length=100),
+            field=models.CharField(
+                default='Configuracion global', max_length=100),
         ),
     ]

@@ -57,7 +57,8 @@ ROOT_URLCONF = 'seduzac.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Directorio base de plantillas
+        # Directorio base de plantillas
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,  # Activa la búsqueda de plantillas en cada aplicación
         'OPTIONS': {
             'context_processors': [

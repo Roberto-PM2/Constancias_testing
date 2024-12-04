@@ -9,5 +9,6 @@ urlpatterns = [
     path('logout/', views.cerrar_sesion, name='logout'),
 
     path('crear/', views.crear_constancia, name='crear_constancia'),
-    path('generada/<int:constancia_id>/', views.constancia_generada, name='constancia_generada'),
+    path('generada/<int:constancia_id>/',
+         views.constancia_generada, name='constancia_generada'),
 ]
