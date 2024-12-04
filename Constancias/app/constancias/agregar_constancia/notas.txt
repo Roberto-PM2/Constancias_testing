@@ -1,0 +1,67 @@
+<?php
+		$Menu = new GenMenu();
+		echo $Menu->GenerarMenu();
+
+		#tipousuario 2(Region), 4(Central)
+		$tipoUsuario = $_SESSION['S_tipo_user'];
+		$usuarioCct = $_SESSION['S_cct'];
+		$nombreUsuario = $_SESSION['S_nombre'];
+		
+?>
+
+a lo que se entiende el tipo de usuario y su clave de centro trabajo actal se dan con el login para realizar busquedas
+
+function getNominaFederal($busca = ''){
+		$Query = MariaDBClient::Connect();
+		$sqlFederal =" SELECT MAX(QNA_CONTROL) as MAX
+							,NOM_EMP
+							, RFC
+					FROM CHEQUES
+					WHERE RFC =  '$busca'
+						AND MOT_MOV != 0
+					GROUP BY 2,3
+					ORDER BY 1 DESC";
+		$resFederal = $Query->query($sqlFederal);
+		$objEmp = $resFederal->fetch_object();
+		$datos = ($objEmp) ? $objEmp : false;
+		$Query->close();
+		
+		return $datos;
+	}
+
+	function getNominaEstatal($busca = ''){
+
+		$Query = MariaDBClient::Connect();
+		$sqlEstatal = "SELECT MAX(QNACONTROL) as MAX
+						, NOM_EMP
+						, RFCEMP
+					FROM CHEQUES_B
+					WHERE RFCEMP =  '$busca'
+					GROUP BY 2,3";
+		$resEstatal = $Query->query($sqlEstatal);
+		$objEmp = $resEstatal->fetch_object();
+		$datos = ($objEmp) ? $objEmp : false;
+		$Query->close();
+		
+		return $datos;
+}
+
+				$objEmp = getNominaFederal($busca);
+				$qnaControlFed = ($objEmp) ? $objEmp->MAX : 0 ;
+				
+				$objEmpEst = getNominaEstatal($busca);
+				$qnaControlEst = ($objEmpEst) ? $objEmpEst->MAX : 0 ;
+
+				if ($qnaControlFed > $qnaControlEst){
+					$qnaMaxControl = $qnaControlFed;
+					$actualQna  = 'F';
+				} else {
+					$qnaMaxControl = $qnaControlEst;
+					$actualQna = 'E';
+				}
+				//echo '$qnaMaxControl ',$qnaMaxControl,'<br>'
+
+hace una comparacion de cheques para determinar si es federal o estatal?
+tal vez hay que preguntar mejor
+(deberian incluir un simple valor en la tabla empleados que diga si uno es federal o estatal en lugar de una cadena de busquedas toda rara)
+

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Crear Constancia</h2>
+
+<form method="post" action="{% url 'crear_constancia' %}">
+    {% csrf_token %}
+    <div>
+        <label for="rfc">RFC:</label>
+        <input type="text" id="rfc" name="rfc" required>
+    </div>
+    <div>
+        <label for="clave_centro_trabajo">Clave Centro de Trabajo Actual:</label>
+        <input type="text" id="claveCT" name="claveCT" required>
+    </div>
+    <div>
+        <label for="tipo_constancia">Tipo de Constancia:</label>
+        <select id="tipo_constancia" name="tipo_constancia" required>
+            <option value="">Seleccione una opción</option>
+            {% for tipo, nombre in tipos_constancia %}
+                {% if tipo in constancias_habilitadas %}
+                    <option value="{{ tipo }}">{{ nombre }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" id="btnCrear">Crear Constancia</button>
+</form>
+
+{% endblock %}

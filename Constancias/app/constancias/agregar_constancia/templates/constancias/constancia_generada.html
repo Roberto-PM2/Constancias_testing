@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia Generada</title>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .printable-area, .printable-area * {
+                visibility: visible;
+            }
+            .printable-area {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% load static %}
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <div class="printable-area">
+        <h1>Constancia</h1>
+
+        {% if constancia.incluir_logo %}
+            <img src="{{ constancia.logo.url }}" alt="Logo de la constancia" style="width: 100px; height: auto;">
+        {% endif %}
+
+        {% if constancia.nombre_completo %}
+            <p><strong>Nombre:</strong> {{ constancia.nombre_completo }}</p>
+        {% endif %}
+        {% if constancia.curp %}
+            <p><strong>CURP:</strong> {{ constancia.curp }}</p>
+        {% endif %}
+        {% if constancia.filiacion %}
+            <p><strong>RFC:</strong> {{ constancia.filiacion }}</p>
+        {% endif %}
+        {% if constancia.get_tipo_constancia_display %}
+            <p><strong>Tipo de Constancia:</strong> {{ constancia.get_tipo_constancia_display }}</p>
+        {% endif %}
+        {% if constancia.categoria_plaza %}
+            <p><strong>Categoría de Plaza:</strong> {{ constancia.categoria_plaza }}</p>
+        {% endif %}
+        {% if constancia.get_tipo_nombramiento_display %}
+            <p><strong>Tipo de Nombramiento:</strong> {{ constancia.get_tipo_nombramiento_display }}</p>
+        {% endif %}
+        {% if constancia.clave_centro_trabajo %}
+            <p><strong>Clave del Centro de Trabajo:</strong> {{ constancia.clave_centro_trabajo }}</p>
+        {% endif %}
+        {% if constancia.nombre_centro_trabajo %}
+            <p><strong>Nombre del Centro de Trabajo:</strong> {{ constancia.nombre_centro_trabajo }}</p>
+        {% endif %}
+        {% if constancia.direccion %}
+            <p><strong>Dirección:</strong> {{ constancia.direccion }}</p>
+        {% endif %}
+        {% if constancia.municipio %}
+            <p><strong>Municipio:</strong> {{ constancia.municipio }}</p>
+        {% endif %}
+        {% if constancia.localidad %}
+            <p><strong>Localidad:</strong> {{ constancia.localidad }}</p>
+        {% endif %}
+        {% if constancia.sueldo_mensual %}
+            <p><strong>Sueldo Mensual:</strong> ${{ constancia.sueldo_mensual }}</p>
+        {% endif %}
+        {% if constancia.get_partida_display %}
+            <p><strong>Partida Presupuestal:</strong> {{ constancia.get_partida_display }}</p>
+        {% endif %}
+        {% if constancia.fecha_input %}
+            <p><strong>Fecha de Ingreso:</strong> {{ constancia.fecha_input }}</p>
+        {% endif %}
+        {% if constancia.motivo_constancia %}
+            <p><strong>Motivo de la Constancia:</strong> {{ constancia.motivo_constancia }}</p>
+        {% endif %}
+        {% if constancia.comentarios_observaciones %}
+            <p><strong>Comentarios u Observaciones:</strong> {{ constancia.comentarios_observaciones }}</p>
+        {% endif %}
+        {% if constancia.fecha_expiracion %}
+            <p><strong>Fecha de Expiración:</strong> {{ constancia.fecha_expiracion }}</p>
+        {% endif %}
+        {% if constancia.fecha_creacion_constancia %}
+            <p><strong>Fecha de Creación:</strong> {{ constancia.fecha_creacion_constancia }}</p>
+        {% endif %}
+        {% if constancia.firma %}
+            <p><strong>Firma:</strong> {{ constancia.firma }}</p>
+        {% endif %}
+    </div>
+
+    <div class="no-print">
+        <button onclick="window.print()">Imprimir</button>
+        <a href="{% url 'crear_constancia' %}" class="button">Generar otra constancia</a>
+        <a href="{% url 'lista_constancias' %}" class="button">Ver la lista de constancias</a>
+    </div>
+</body>
+</html>

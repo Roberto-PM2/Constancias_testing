@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constancia</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        .dato {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .dato strong {
+            color: #007bff;
+        }
+        .recuadro {
+            display: inline-block;
+            padding: 5px 10px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background-color: #ffffff;
+            font-weight: bold;
+            color: #333;
+   
+        }
+        .recuadro-textarea {
+            display: inline-block;
+            width: 100%;
+            max-width: 200px;
+            padding: 5px 10px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background-color: #ffffff;
+            font-size: 14px;
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Constancia de Promoción</h1>
+
+    <div class="dato">
+        <strong>RFC:</strong> <span class="recuadro">{{ empleado.rfc }}</span>
+    </div>
+    <div class="dato">
+        <strong>Nombre:</strong> <span class="recuadro">{{ empleado.nombre }}</span>
+    </div>
+    <div class="dato">
+        <strong>CURP:</strong> <span class="recuadro">{{ empleado.curp }}</span>
+    </div>
+    <div class="dato">
+        <strong>Otros Datos:</strong>
+        <textarea class="recuadro-textarea" placeholder="Escribe aquí..."></textarea>
+    </div>
+</body>
+</html>
