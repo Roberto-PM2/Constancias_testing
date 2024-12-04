@@ -129,7 +129,8 @@
                                 <strong>Nombre:</strong> {{ constancia.nombre_completo }}<br>
                                 <strong>Fecha de Emisión:</strong> {{ constancia.fecha_creacion_constancia }}<br>
                                 <strong>RFC:</strong> {{ constancia.filiacion }}<br>
-                                <strong>Activa:</strong> {{ constancia.Activa|yesno:"Sí,No" }}<br>
+                                <strong>Tipo:</strong> {{ constancia.get_tipo_constancia_display }}<br>
+                                <strong>Estado:</strong> {{ constancia.Activa|yesno:"Activa,Inactiva" }}<br>
                                 <a href="{% url 'editar_constancia' constancia.id %}">
                                     <button type="button">Editar Constancia</button>
                                 </a>
@@ -137,7 +138,7 @@
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <p>No se encontraron constancias que coincidan con los filtros aplicados.</p>
+                    <p id="mensaje_error">No se encontraron constancias que coincidan con los filtros aplicados.</p>
                 {% endif %}
             {% endif %}
         </div>
