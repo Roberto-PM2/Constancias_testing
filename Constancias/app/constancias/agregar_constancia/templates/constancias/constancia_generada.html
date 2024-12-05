@@ -93,9 +93,16 @@
     </div>
 
     <div class="no-print">
-        <button onclick="window.print()">Imprimir</button>
+        <button id="boton-imprimir" onclick="imprimirYNotificar()">Imprimir</button>
         <a href="{% url 'crear_constancia' %}" class="button">Generar otra constancia</a>
         <a href="{% url 'lista_constancias' %}" class="button">Ver la lista de constancias</a>
     </div>
+
+    <script>
+        function imprimirYNotificar() {
+            alert('Constancia enviada a imprimir, haz clic en aceptar para continuar'); // Mostrar alerta
+            window.print(); // Iniciar impresión
+        }
+    </script>
 </body>
 </html>

@@ -5,6 +5,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from unittest.mock import patch
 
+
 class ViewsTestCase(TestCase):
     databases = {'default', 'personal'}
 
@@ -69,12 +70,6 @@ class ViewsTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "El RFC no debe contener caracteres especiales.")
-
-
-    
-from django.test import TestCase, Client
-from django.urls import reverse
-
 
 class VerConstanciaTestCase(TestCase):
     databases = {'default', 'personal'}  # Usa la base de datos 'personal' en modo consulta

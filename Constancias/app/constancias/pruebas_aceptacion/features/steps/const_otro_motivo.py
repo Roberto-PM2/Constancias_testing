@@ -85,11 +85,8 @@ def step_impl(context):
 
     time.sleep(2)
 
-    # Rellenar campos de "claves[]"
     context.driver.find_element(By.ID, 'clave-nueva').send_keys(data['clave'])
-    # for i, clave in enumerate(data['claves[]']):
-    #     clave_field = context.driver.find_element(By.ID, f'clave-{i+1}')  # Asegúrate de usar el ID correcto
-    #     clave_field.send_keys(clave)
+
 
 
 @when(u'presiono el botón de guardar constancia')
