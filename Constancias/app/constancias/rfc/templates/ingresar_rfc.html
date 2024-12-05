@@ -4,9 +4,9 @@
     <title>Ingresar RFC</title>
 </head>
 <body>
-    <h1>Ingresar RFCsssaa</h1>
+    <h1>Ingresar RFC</h1>
     {% if error %}
-        <p style="color: red;">{{ error }}</p>
+        <p id="mensaje_error" style="color: red;">{{ error }}</p>
     {% endif %}
     <form method="post">
         {% csrf_token %}

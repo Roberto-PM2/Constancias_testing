@@ -18,9 +18,9 @@
 </head>
 <body>
     <h1>Seleccionar Constancia</h1>
-    <p>RFC: {{ empleado.rfc }}</p>
-    <p>Empleado: {{ empleado.nombre }}</p>
-    <p>CURP: {{ empleado.curp }}</p>
+    <p id="rfc">RFC: {{ empleado.rfc }}</p>
+    <p id="empleado">Empleado: {{ empleado.nombre }}</p>
+    <p id="curp">CURP: {{ empleado.curp }}</p>
     
     <label for="constancia-select">Selecciona una constancia:</label>
     <select id="constancia-select" onchange="redirigir()">
