@@ -27,7 +27,7 @@ def step_impl(context):
     data = {
         'rfc': '000020860d47c',
         'claveCT': '32ABJ0001W',
-        'tipo_constancia':'CAMBIO_CENTRO'
+        'tipo_constancia': 'CAMBIO_CENTRO'
     }
     context.driver.find_element(By.NAME, 'rfc').send_keys(data['rfc'])
     context.driver.find_element(By.NAME, 'claveCT').send_keys(data['claveCT'])

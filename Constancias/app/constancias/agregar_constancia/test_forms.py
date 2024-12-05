@@ -100,7 +100,6 @@ class FormInvalidoTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('nombre_completo', form.errors)  # Reemplaza por los campos obligatorios
 
-
     def test_constancia_otro_motivo_form_invalid_data(self):
         form_data = {
             'tipo_constancia': 'INVALID'  # Campo bloqueado

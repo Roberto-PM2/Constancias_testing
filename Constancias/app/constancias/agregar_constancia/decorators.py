@@ -2,7 +2,9 @@
 from django.http import HttpResponseForbidden
 from .models import ConstanciaAccessControl
 
-#modifique este decorador con los permisos requeridos
+# modifique este decorador con los permisos requeridos
+
+
 def verificar_acceso_constancia(tipo_constancia):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):

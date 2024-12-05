@@ -25,7 +25,6 @@ from .forms import (
 )
 from django.core.files.uploadedfile import SimpleUploadedFile
 import os
-from django.http import HttpResponseForbidden
 
 
 class TestViews(TestCase):
@@ -106,7 +105,7 @@ class TestViews(TestCase):
             motivo_constancia='Proceso de promoción',
             firma='Capital Humano Edificio Central',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
 
@@ -129,7 +128,7 @@ class TestViews(TestCase):
             motivo_constancia='Proceso de admision',
             firma='Director General',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
 
@@ -152,7 +151,7 @@ class TestViews(TestCase):
             motivo_constancia='Horas adicionales',
             firma='Director General',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
 
@@ -176,7 +175,7 @@ class TestViews(TestCase):
             firma='Director General',
             comentarios_observaciones='hola',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
 
@@ -204,7 +203,7 @@ class TestViews(TestCase):
             ),
             firma='Director General',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
 
@@ -227,7 +226,7 @@ class TestViews(TestCase):
             motivo_constancia='Proceso horizontal',
             firma='Director General',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
 
@@ -250,7 +249,7 @@ class TestViews(TestCase):
             motivo_constancia='Proceso de basificación de Personal de Apoyo y Asistencia a la Educación.',
             firma='Director General',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
 
@@ -274,17 +273,15 @@ class TestViews(TestCase):
             firma='Director General',
             comentarios_observaciones='hola',
             incluir_logo=False,
-            logo=logo_file,  
+            logo=logo_file,
             fecha_creacion_constancia='2024-11-09'
         )
-
 
     def test_lista_constancias(self):
         # Verificar que la vista de la lista de constancias funciona correctamente
         response = self.client.get(reverse('lista_constancias'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Constancia')
-
 
     def test_eliminar_constancia(self):
         # Verificar que la eliminación de una constancia funciona correctamente
@@ -304,11 +301,10 @@ class TestViews(TestCase):
         response = self.client.post(reverse('cambiar_estado', args=[99999]))  # ID inexistente
         self.assertEqual(response.status_code, 404)  # Debería devolver un error 404
 
-
     def test_nueva_constancia_om_post(self):
         # Crear un archivo ficticio para el logo
         logo_file = SimpleUploadedFile("logo.jpg", b"file_content", content_type="image/jpeg")
-        
+
         data = {
             'curp': 'RACW050729MMCSHNA2',
             'filiacion': 'RFC123456',
@@ -386,7 +382,7 @@ class TestViews(TestCase):
         # Cierra el archivo después de usarlo
         files['logo'].close()
 
-#promocion vertical-----------------------------------------------------
+# promocion vertical-----------------------------------------------------
 
     def test_crear_nueva_constancia_PV(self):
         # Datos de prueba para la solicitud POST
@@ -475,7 +471,7 @@ class TestViews(TestCase):
         self.constanciaPV_test.refresh_from_db()
         self.assertEqual(self.constanciaPV_test.nombre_completo, 'Jane Doe')
 
-#admision-----------------------------------------------------
+# admision-----------------------------------------------------
 
     def test_crear_nueva_constancia_Admision(self):
         # Datos de prueba para la solicitud POST
@@ -555,7 +551,7 @@ class TestViews(TestCase):
         self.constanciaAdmision_test.refresh_from_db()
         self.assertEqual(self.constanciaAdmision_test.nombre_completo, 'Jane Doe')
 
-#horas adicionales------------------------------------
+# horas adicionales------------------------------------
     def test_crear_nueva_Horas_Adicionales(self):
         # Datos de prueba para la solicitud POST
         self.client.login(username='testuser', password='password')
@@ -644,7 +640,7 @@ class TestViews(TestCase):
         self.constanciaHA_test.refresh_from_db()
         self.assertEqual(self.constanciaHA_test.nombre_completo, 'Jane Doe')
 
-#cambio centro-----------------------------------------------
+# cambio centro-----------------------------------------------
 
     def test_crear_nueva_Cambio_Centro(self):
         # Datos de prueba para la solicitud POST
@@ -736,7 +732,7 @@ class TestViews(TestCase):
         self.assertEqual(self.constanciaCambioCT_test.nombre_completo, 'Jane Doe')
         self.assertEqual(self.constanciaCambioCT_test.comentarios_observaciones, 'un comentario')
 
-#reconocimiento--------------------------------------------
+# reconocimiento--------------------------------------------
 
     def test_crear_nueva_Reconocimiento(self):
         # Datos de prueba para la solicitud POST
@@ -825,7 +821,7 @@ class TestViews(TestCase):
         self.ConstanciaReconocimiento_test.refresh_from_db()
         self.assertEqual(self.ConstanciaReconocimiento_test.nombre_completo, 'Jane Doe')
 
-#promocion horizontal------------------------------
+# promocion horizontal------------------------------
 
     def test_crear_nueva_Promoción_Horizontal(self):
         # Datos de prueba para la solicitud POST
@@ -856,7 +852,7 @@ class TestViews(TestCase):
             'licencias_fecha_inicio[]': ['2024-01-01', '2024-02-01'],
             'licencias_fecha_termino[]': ['2024-03-01', '2024-04-01'],
         }
-        
+
         logo_file = SimpleUploadedFile("logo.jpg", b"file_content", content_type="image/jpeg")
         files = {
             'logo': logo_file  # Nombre del campo que espera el formulario
@@ -915,7 +911,7 @@ class TestViews(TestCase):
         self.ConstanciaPH_test.refresh_from_db()
         self.assertEqual(self.ConstanciaPH_test.nombre_completo, 'Jane Doe')
 
-#basificacion estatal---------------------------
+# basificacion estatal---------------------------
 
     def test_crear_nueva_Basificación_estatal(self):
         # Datos de prueba para la solicitud POST
@@ -990,7 +986,7 @@ class TestViews(TestCase):
         self.ConstanciaBE_test.refresh_from_db()
         self.assertEqual(self.ConstanciaBE_test.nombre_completo, 'Jane Doe')
 
-#cambio centro preparatoria-------------------
+# cambio centro preparatoria-------------------
 
     def test_crear_nueva_Cambio_Centro_preparatoria(self):
         # Datos de prueba para la solicitud POST
@@ -1082,7 +1078,8 @@ class TestViews(TestCase):
         self.assertEqual(self.ConstanciaCambioCTP_test.nombre_completo, 'Jane Doe')
         self.assertEqual(self.ConstanciaCambioCTP_test.comentarios_observaciones, 'un comentario')
 
-#otras vistas------------------------------
+# otras vistas------------------------------
+
 
 class CalcularDuracionTest(TestCase):
     def test_calcular_duracion_contratos(self):
@@ -1138,6 +1135,7 @@ class CalcularDuracionTest(TestCase):
         # 730 días = 2 años, 0 meses y 0 días
         self.assertEqual(response_data['years'], 2)
 
+
 class LogosViews(TestCase):
     def setUp(self):
         # Abrir el archivo 'hola.jpg' en modo binario y crear un SimpleUploadedFile
@@ -1161,14 +1159,12 @@ class LogosViews(TestCase):
         self.client = Client()
 
     def test_bienvenida_acceso(self):
-        logo_path = os.path.join(settings.MEDIA_ROOT, 'hola.jpg')
         """La vista de bienvenida se carga correctamente."""
         response = self.client.get(reverse('bienvenida'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'constancias/bienvenida.html')
 
     def test_iniciar_sesion(self):
-        logo_path = os.path.join(settings.MEDIA_ROOT, 'hola.jpg')
         """Probar el inicio de sesión con credenciales válidas."""
         User.objects.create_user(username='fernando', password='asdf1234')
         response = self.client.post(reverse('login'), {'username': 'fernando', 'password': 'asdf1234'})
@@ -1183,14 +1179,12 @@ class LogosViews(TestCase):
         new_logo = SimpleUploadedFile("new_logo.png", b"logo_mock", content_type="image/png")
         response = self.client.post(reverse('configurar_logo'), {'logo': logo_file2})
 
-        #prueba solo pasa si la carpeta de medios esta vacia de primeras
-        #nconfigurar una carpeta de medios prueba que se borre automaticamente
+        # prueba solo pasa si la carpeta de medios esta vacia de primeras
+        # nconfigurar una carpeta de medios prueba que se borre automaticamente
         self.configuracion.refresh_from_db()
         self.assertEqual(self.configuracion.logo.name, "logos/adios.jpg")
 
-
     def test_bienvenida_no_logueado(self):
-        logo_path = os.path.join(settings.MEDIA_ROOT, 'hola.jpg')
         """Los usuarios no logueados deben ser redirigidos al inicio de sesión."""
         response = self.client.get(reverse('crear_constancia'))
         self.assertEqual(response.status_code, 302)  # Redirección al login
@@ -1275,7 +1269,6 @@ class TestViewsLogin(TestCase):
         # Crear un usuario de prueba para las vistas de inicio de sesión
         self.user = User.objects.create_user(username='testuser', password='1234')
         self.client.login(username='testuser', password='1234')
-        
 
     def test_logout(self):
         """Prueba el inicio de sesión con credenciales válidas"""
@@ -1298,20 +1291,18 @@ class TestViewsLogin(TestCase):
     def test_registrarse_success(self):
         """Prueba el registro exitoso de un nuevo usuario"""
         response = self.client.post(reverse('registrarse'), {
-            'username': 'newuser', 
-            'password1': 'contraseña_kj148ds', 
+            'username': 'newuser',
+            'password1': 'contraseña_kj148ds',
             'password2': 'contraseña_kj148ds'
         })
         self.assertTrue(User.objects.filter(username='newuser').exists())  # Verifica que el usuario fue creado
-        
 
     def test_registrarse_failure(self):
         """Prueba el registro con datos inválidos"""
         response = self.client.post(reverse('registrarse'), {
-            'username': 'newuser2', 
-            'password1': 'contraseña_kj148ds', 
+            'username': 'newuser2',
+            'password1': 'contraseña_kj148ds',
             'password2': 'otro'
         })
         self.assertFalse(User.objects.filter(username='newuser2').exists())  # Verifica que el usuario no fue creado
         self.assertTemplateUsed(response, 'constancias/registro.html')
-

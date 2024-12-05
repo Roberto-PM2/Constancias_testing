@@ -10,7 +10,7 @@ from agregar_constancia.validadores import curp_validator
 class Constancia(models.Model):
     # Usuario relacionado
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)  # Campo de usuario logeado
-    
+
     # Choices for 'tipoconstancia'
     TIPOS_CONSTANCIA = [
         ('OTRO', 'Otro Motivo'),
@@ -27,7 +27,7 @@ class Constancia(models.Model):
     Activa = models.BooleanField(default=True)
 
     # Datos básicos del docente se quita el validador de curp por el momento al estar obsuscados en la bd
-    curp = models.CharField(max_length=18) #validators=[curp_validator]
+    curp = models.CharField(max_length=18)  # validators=[curp_validator]
     filiacion = models.CharField(max_length=13)  # RFC
     nombre_completo = models.CharField(max_length=255)
     categoria_plaza = models.CharField(max_length=100)
@@ -79,13 +79,14 @@ class Constancia(models.Model):
     def __str__(self):
         return f"{self.nombre_completo} - {self.tipo_constancia}"
 
-    
+
 class Configuracion(models.Model):
     logo = models.ImageField(upload_to='logos/', null=True, blank=True)
 
     def __str__(self):
         return "Configuración General"
-    
+
+
 class ClavesConstancia(models.Model):
     constancia = models.ForeignKey(Constancia, related_name="claves", on_delete=models.CASCADE)
     clave = models.CharField(max_length=255)
@@ -122,14 +123,15 @@ class LicenciaConstancia(models.Model):
 
     def __str__(self):
         return f"Licencia en {self.adscripcion} - {self.codigo}"
-    
-#un modelo para llevar acabo el permiso de acesso para cada tipo de constancias
-#cada tipo de constancia debe agregarse manualmente en el panel admin de django
-#asegurarse de que al agregarla correspondan los tipos junto a tipos constancia del modelo constancias en la parte superior de este archivo
+
+# un modelo para llevar acabo el permiso de acesso para cada tipo de constancias
+# cada tipo de constancia debe agregarse manualmente en el panel admin de django
+# asegurarse de que al agregarla correspondan los tipos junto a tipos constancia del modelo constancias en la parte superior de este archivo
+
+
 class ConstanciaAccessControl(models.Model):
     tipo_constancia = models.CharField(max_length=50, unique=True)  # Tipo de constancia
     habilitado = models.BooleanField(default=False)  # Control de acceso
 
     def __str__(self):
         return f"{self.tipo_constancia} - {'Habilitado' if self.habilitado else 'Deshabilitado'}"
-

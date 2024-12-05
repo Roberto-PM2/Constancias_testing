@@ -3,7 +3,6 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from datetime import datetime
 import time
 from selenium.common.exceptions import NoSuchElementException
 
@@ -26,11 +25,11 @@ def step_impl(context):
 def step_impl(context):
     # Paso 1: Ir a la lista de constancias desde el panel de administración
     context.driver.get('http://localhost:8000/admin/agregar_constancia/constanciaaccesscontrol/')
-    
+
     # Paso 2: Seleccionar la casilla de verificación de la constancia "OTRO"
     checkbox_otro = context.driver.find_element(By.CSS_SELECTOR, 'input[type="checkbox"][aria-label*="OTRO"]')
     checkbox_otro.click()  # Marca la casilla de selección para la acción
-    
+
     # Paso 3: Desmarcar el checkbox "habilitado" correspondiente
     checkbox_habilitado = context.driver.find_element(By.ID, 'id_form-8-habilitado')
     if checkbox_habilitado.is_selected():  # Asegurarse de desmarcarlo
@@ -41,10 +40,12 @@ def step_impl(context):
     save_button.click()
     time.sleep(5)
 
+
 @when(u'viajo al formulario de creacion de constancias a verificar')
 def step_impl(context):
     context.driver.get('http://localhost:8000/constancias/crear/')
     time.sleep(5)
+
 
 @then(u'ya no aparece otro motivo')
 def step_impl(context):
@@ -57,7 +58,7 @@ def step_impl(context):
     # Llenar los campos requeridos
     context.driver.find_element(By.NAME, 'rfc').send_keys(data['rfc'])
     context.driver.find_element(By.NAME, 'claveCT').send_keys(data['claveCT'])
-    
+
     # Verificar que "OTRO" no esté en el select de tipo_constancia
     select_tipo = Select(context.driver.find_element(By.NAME, 'tipo_constancia'))
     try:
@@ -68,7 +69,8 @@ def step_impl(context):
         # Si se lanza la excepción, significa que no está disponible (éxito esperado)
         pass
 
-#activar----------------------
+# activar----------------------
+
 
 @given(u'cambio el estado de constancia otro motivo a activada')
 def step_impl(context):
@@ -89,6 +91,7 @@ def step_impl(context):
     # Esperar para confirmar que los cambios se han guardado
     time.sleep(5)
 
+
 @then(u'si me aparece otro motivo')
 def step_impl(context):
     context.driver.get('http://localhost:8000/constancias/crear/')
@@ -100,7 +103,7 @@ def step_impl(context):
     # Llenar los campos requeridos
     context.driver.find_element(By.NAME, 'rfc').send_keys(data['rfc'])
     context.driver.find_element(By.NAME, 'claveCT').send_keys(data['claveCT'])
-    
+
     # Verificar que "OTRO" sí esté en el select de tipo_constancia
     select_tipo = Select(context.driver.find_element(By.NAME, 'tipo_constancia'))
     try:

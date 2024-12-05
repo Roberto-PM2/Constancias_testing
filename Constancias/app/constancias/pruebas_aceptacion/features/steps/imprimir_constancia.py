@@ -1,14 +1,15 @@
-from behave import  given, when , then 
-from selenium import webdriver 
-from selenium.webdriver.common.keys import Keys 
+from behave import given, when, then
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.by import By 
+from selenium.webdriver.common.by import By
 from datetime import datetime
 import time
 
+
 @given(u'que inicio sesión como usuario region "{username}" y contraseña "{password}"')
 def step_impl(context, username, password):
-    context.driver =  webdriver.Chrome()
+    context.driver = webdriver.Chrome()
     context.driver.get('http://localhost:8000/constancias/login')
     context.driver.find_element(By.NAME, 'username').send_keys(username)
     context.driver.find_element(By.NAME, 'password').send_keys(password)
@@ -21,7 +22,7 @@ def step_impl(context, rfc, clave):
     time.sleep(1)
     context.driver.get('http://localhost:8000/constancias/crear/')
     data = {
-        'tipo_constancia':'OTRO'
+        'tipo_constancia': 'OTRO'
     }
     context.driver.find_element(By.NAME, 'rfc').send_keys(rfc)
     context.driver.find_element(By.NAME, 'claveCT').send_keys(clave)
@@ -30,6 +31,7 @@ def step_impl(context, rfc, clave):
     select_constancia.select_by_value(data['tipo_constancia'])
     context.driver.find_element(By.ID, 'btnCrear').click()
     time.sleep(1)  # Espera para procesar la solicitud
+
 
 @given(u'completo el formulario de la constancia para imprimir')
 def step_impl(context):
@@ -62,15 +64,18 @@ def step_impl(context):
 
     context.driver.find_element(By.ID, 'clave-nueva').send_keys(data['clave'])
 
+
 @given(u'presiono el botón guardar constancia y se crea la constancia')
 def step_impl(context):
     context.driver.find_element(By.ID, 'btnAgregar').click()
     time.sleep(2)
 
+
 @when(u'presiono el botón Imprimir')
 def step_impl(context):
     context.driver.find_element(By.ID, 'boton-imprimir').click()
     time.sleep(2)
+
 
 @then(u'la constancia se manda a imprimir')
 def step_impl(context):

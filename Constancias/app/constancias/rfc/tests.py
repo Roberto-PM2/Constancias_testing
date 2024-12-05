@@ -22,7 +22,6 @@ class ViewsTestCase(TestCase):
         session['claveCT'] = '32ABJ0001W'  # Clave de centro de trabajo de ejemplo
         session.save()  # Guarda los cambios en la sesión
 
-
     def test_rfc_valido(self):
         """
         Prueba que una solicitud POST válida redirige 
@@ -31,7 +30,7 @@ class ViewsTestCase(TestCase):
             'rfc': '000020860d47c',
         })
         self.assertEqual(response.status_code, 200)
-    
+
     def test_rfc_valido_get(self):
         """
         Prueba que una solicitud POST válida redirige 
@@ -49,7 +48,6 @@ class ViewsTestCase(TestCase):
             'rfc': '000020860dxxx',
         })
         self.assertEqual(response.status_code, 200)  # Verifica que no redirija, sino que cargue la misma página
-        
 
     def test_rfc_invalido_limite_caracteres(self):
         """
@@ -71,6 +69,7 @@ class ViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "El RFC no debe contener caracteres especiales.")
 
+
 class VerConstanciaTestCase(TestCase):
     databases = {'default', 'personal'}  # Usa la base de datos 'personal' en modo consulta
 
@@ -89,4 +88,3 @@ class VerConstanciaTestCase(TestCase):
     def test_constancia_rfc_inexistente(self):
         response = self.client.get(self.ver_constancia_url, {'rfc': '00004f4'})
         self.assertEqual(response.status_code, 200)
-        

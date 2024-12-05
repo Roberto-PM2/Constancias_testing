@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from agregar_constancia.models import Constancia
 
+
 def buscar_constancias(request):
     nombre = request.GET.get('nombre', '')
     fecha_emision = request.GET.get('fecha_emision', '')

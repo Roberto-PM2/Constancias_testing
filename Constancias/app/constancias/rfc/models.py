@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class EmpleadoComp(models.Model):
     rfcemp = models.CharField(max_length=50)
     nom_emp = models.CharField(max_length=100)

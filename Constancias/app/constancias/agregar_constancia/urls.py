@@ -10,7 +10,7 @@ urlpatterns = [
     path('crear/', views.crear_constancia, name='crear_constancia'),
     path('generada/<int:constancia_id>/', views.constancia_generada, name='constancia_generada'),
     path('configurar_logo/', views.configurar_logo, name='configurar_logo'),
-    #urls constancias tipos
+    # urls constancias tipos
     path('nuevoCOM/', views.nueva_constanciaOM, name='nuevoCOM'),
     path('nuevoCPV/', views.nueva_constanciaPV, name='nuevoCPV'),
     path('nuevoCAdmision/', views.nueva_constanciaAdmision, name='nuevoCAdmision'),

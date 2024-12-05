@@ -1,22 +1,14 @@
 from django.test import TestCase, Client
-from django.forms import ValidationError
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
-from datetime import date, datetime
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import HttpResponseForbidden
 from agregar_constancia.models import (
     Constancia,
-    ClavesConstancia,
-    LicenciaConstancia,
-    ContratoConstancia,
     Configuracion,
-    ConstanciaAccessControl
 )
 from .forms import ConstanciaSearchForm
 from constancias import settings
 import os
-
 
 
 class ConstanciaFormTests(TestCase):
@@ -57,11 +49,11 @@ class ConstanciaFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('rfc', form.errors)
 
-#test de models de constancia estan en la carpeta agregar constancia
+# test de models de constancia estan en la carpeta agregar constancia
+
 
 class BuscarConstanciasViewTests(TestCase):
     databases = {'default', 'personal'}  # Permite el acceso a 'personal'
-
 
     def setUp(self):
         # Crear un usuario de prueba
@@ -183,8 +175,8 @@ class BuscarConstanciasViewTests(TestCase):
             'nombre': 'Juan',
             'fecha_emision': '2024-01-01',
             'rfc': 'PECJ801201ABC',
-            'tipo_constancia':'OTRO',
-            'activa':'true',
+            'tipo_constancia': 'OTRO',
+            'activa': 'true',
         })
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['filtros_aplicados'])

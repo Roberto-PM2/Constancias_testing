@@ -140,6 +140,7 @@ def verifica_resultados_varios_filtros(context, nombre, fecha, rfc):
     ), f"No se encontraron constancias que coincidan con nombre '{nombre}', fecha '{fecha}', y RFC '{rfc}'"
     context.driver.quit()
 
+
 @when(u'selecciono "{tipo_constancia}" en el filtro de tipo de constancia')
 def seleccionar_tipo_constancia(context, tipo_constancia):
     select = Select(context.driver.find_element(By.NAME, 'tipo_constancia'))
@@ -154,12 +155,14 @@ def verificar_resultados_tipo_constancia(context, tipo_constancia):
     assert all(tipo_constancia in resultado.text for resultado in resultados), \
         f"No se encontraron constancias de tipo '{tipo_constancia}'"
 
+
 @when(u'selecciono "{estado}" en el filtro de estado')
 def seleccionar_estado(context, estado):
     select = Select(context.driver.find_element(By.NAME, 'activa'))
     select.select_by_visible_text(estado)
     context.driver.find_element(By.ID, 'btnBuscar').click()
     time.sleep(2)
+
 
 @then(u'el sistema muestra únicamente las constancias "{estado}"')
 def verificar_resultados_estado(context, estado):

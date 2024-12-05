@@ -33,7 +33,9 @@ from django.db import connections
 
 from .decorators import verificar_acceso_constancia
 
-#funcion para buscar datos del maestro a partir del rfc
+# funcion para buscar datos del maestro a partir del rfc
+
+
 def getInfo_Empleado_RFC(rfc):
     """
     Consulta en la base de datos los datos del empleado a partir del RFC.
@@ -51,7 +53,7 @@ def getInfo_Empleado_RFC(rfc):
     return None
 
 
-#funcion para obtener datos a partir de la clave del centro de trabajo
+# funcion para obtener datos a partir de la clave del centro de trabajo
 def getInfo_Clave_Centro_Trabajo(claveCT):
     """
     Consulta en la base de datos los datos del centro a partir de la clave.
@@ -65,10 +67,10 @@ def getInfo_Clave_Centro_Trabajo(claveCT):
         result = cursor.fetchone()
 
     if result:
-        return {"nombre": result[0], 
-                "domicilio": result[1], 
-                "municipio": result[2], 
-                "localidad": result[3], 
+        return {"nombre": result[0],
+                "domicilio": result[1],
+                "municipio": result[2],
+                "localidad": result[3],
                 "claveCT": claveCT}
     return None
 
@@ -97,13 +99,16 @@ def calcular_duracion(request):
         'days': days
     })
 
-#funciones que procesan las claves contratos y licencias dentro del template y las almacenan en
-#tablas asociadas a la constancia
+# funciones que procesan las claves contratos y licencias dentro del template y las almacenan en
+# tablas asociadas a la constancia
+
+
 def procesar_claves(constancia, claves):
     ClavesConstancia.objects.bulk_create([
         ClavesConstancia(constancia=constancia, clave=clave)
         for clave in claves if clave.strip()
     ])
+
 
 def procesar_contratos(constancia, contratos_adscripcion, contratos_clave_categoria, contratos_codigo, contratos_fecha_inicio, contratos_fecha_termino):
     for i in range(len(contratos_adscripcion)):
@@ -118,6 +123,7 @@ def procesar_contratos(constancia, contratos_adscripcion, contratos_clave_catego
             )
             nuevo_contrato.save()
 
+
 def procesar_licencias(constancia, licencias_adscripcion, licencias_clave_categoria, licencias_codigo, licencias_fecha_inicio, licencias_fecha_termino):
     for i in range(len(licencias_adscripcion)):
         if licencias_adscripcion[i].strip():
@@ -131,7 +137,9 @@ def procesar_licencias(constancia, licencias_adscripcion, licencias_clave_catego
             )
             nueva_licencia.save()
 
-#funcion que a partir del id de constancia redirige al tipo de constancia apropiada
+# funcion que a partir del id de constancia redirige al tipo de constancia apropiada
+
+
 def editar_constancia(request, id_constancia):
     # Obtener la constancia existente
     constancia = Constancia.objects.get(id=id_constancia)
@@ -154,8 +162,9 @@ def editar_constancia(request, id_constancia):
     vista = switch_vistas.get(tipo, None)
     if vista:
         return vista(request, id_constancia)
-    
-#lista tipos constancia
+
+
+# lista tipos constancia
 TIPOS_CONSTANCIA = [
     ('OTRO', 'Otro Motivo'),
     ('PROM_VERTICAL', 'Promoción Vertical'),
@@ -167,8 +176,10 @@ TIPOS_CONSTANCIA = [
     ('BASE_ESTATAL', 'Basificación estatal'),
     ('CAMBIO_CENTRO_PREP', 'Cambios de Centro de Trabajo nivel preparatoria'),
 ]
-    
+
 # Vista para crear una constancia
+
+
 @login_required
 def crear_constancia(request):
     if request.method == 'POST':
@@ -177,7 +188,7 @@ def crear_constancia(request):
         tipo_constancia = request.POST.get('tipo_constancia')
 
         # Consultar la información del empleado
-        #comentar para hacer verificaciones
+        # comentar para hacer verificaciones
         # empleado = getInfoEmpleadoRFC(rfc)
         # if not empleado:
         #     return render(request, 'constancias/crear_constancia.html', {'error': "No se encontró un empleado con el RFC ingresado."})
@@ -204,14 +215,14 @@ def crear_constancia(request):
         if url_name:
             return redirect(reverse(url_name))
 
-     # Obtener los tipos de constancia habilitados
+    # Obtener los tipos de constancia habilitados
     constancias_habilitadas = ConstanciaAccessControl.objects.filter(habilitado=True).values_list('tipo_constancia', flat=True)
 
     return render(request, 'constancias/crear_constancia.html', {
         'constancias_habilitadas': constancias_habilitadas,
         'tipos_constancia': TIPOS_CONSTANCIA,
     })
-    
+
 
 # Vista para listar constancias
 def lista_constancias(request):
@@ -219,27 +230,37 @@ def lista_constancias(request):
     return render(request, 'constancias/lista_constancias.html', {'constancias': constancias})
 
 # vista para activar/desactivar constancias
+
+
 def cambiar_estado(request, id_constancia):
-    #constancia = Constancia.objects.filter(id=id_constancia)
+    # constancia = Constancia.objects.filter(id=id_constancia)
     constancia = get_object_or_404(Constancia, id=id_constancia)
     constancia.Activa = not constancia.Activa
     constancia.save()
     return redirect('lista_constancias')
 
 # Vista para eliminar constancias
+
+
 def eliminar_constancia(request, id_constancia):
     Constancia.objects.filter(id=id_constancia).delete()
     return redirect('lista_constancias')
 
 # Vista principal de inicio
+
+
 def inicio(request):
     return redirect('bienvenida')
 
 # Vista para mostrar la bienvenida
+
+
 def bienvenida(request):
     return render(request, 'constancias/bienvenida.html')
 
 # Vista para iniciar sesión
+
+
 def iniciar_sesion(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -256,6 +277,8 @@ def iniciar_sesion(request):
     return render(request, 'constancias/login.html')
 
 # Vista para registrarse
+
+
 def registrarse(request):
     if request.method == "POST":
         form = RegistroForm(request.POST)
@@ -270,6 +293,8 @@ def registrarse(request):
     return render(request, 'constancias/registro.html', {'form': form})
 
 # Vista para cerrar sesión
+
+
 def cerrar_sesion(request):
     logout(request)
     return redirect('bienvenida')
@@ -288,6 +313,8 @@ def constancia_generada(request, constancia_id):
     })
 
 # Vista para configurar el logo
+
+
 def configurar_logo(request):
     configuracion = Configuracion.objects.first() or Configuracion()
     if request.method == "POST":
@@ -299,8 +326,10 @@ def configurar_logo(request):
         form = ConfiguracionForm(instance=configuracion)
     return render(request, 'constancias/configurar_logo.html', {'form': form})
 
-#funcion que crea un array de datos de acuerdo a las consultas para pasarlos al formulario
-def inicializar_Datos_Form_Constancias(rfc,claveCT):
+# funcion que crea un array de datos de acuerdo a las consultas para pasarlos al formulario
+
+
+def inicializar_Datos_Form_Constancias(rfc, claveCT):
     empleado = getInfo_Empleado_RFC(rfc)
     centroT = getInfo_Clave_Centro_Trabajo(claveCT)
     if not empleado:
@@ -308,21 +337,23 @@ def inicializar_Datos_Form_Constancias(rfc,claveCT):
     if not centroT:
         return render(request, 'constancias/crear_constancia.html', {'error': "No se encontró un Centro de trabajo"})
     initial_data = {
-        'nombre_completo':empleado.get('nombre'),
-        'curp':empleado.get('curp'),
-        'filiacion':empleado.get('rfc'),
-        'clave_centro_trabajo':centroT.get('claveCT'),
-        'nombre_centro_trabajo':centroT.get('nombre'),
-        'direccion':centroT.get('domicilio'),
-        'municipio':centroT.get('municipio'),
-        'localidad':centroT.get('localidad'),
+        'nombre_completo': empleado.get('nombre'),
+        'curp': empleado.get('curp'),
+        'filiacion': empleado.get('rfc'),
+        'clave_centro_trabajo': centroT.get('claveCT'),
+        'nombre_centro_trabajo': centroT.get('nombre'),
+        'direccion': centroT.get('domicilio'),
+        'municipio': centroT.get('municipio'),
+        'localidad': centroT.get('localidad'),
     }
     return initial_data
 
-#Otro Motivo-----------------------------------------
+# Otro Motivo-----------------------------------------
 
 # Vista para crear constancias de "Otro Motivo"
-#cada tipo de constancia tiene su respectivo decorador para verificar permisos de acceso
+# cada tipo de constancia tiene su respectivo decorador para verificar permisos de acceso
+
+
 @login_required
 @verificar_acceso_constancia('OTRO')
 def nueva_constanciaOM(request):
@@ -332,7 +363,7 @@ def nueva_constanciaOM(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaOtroMotivoForm(request.POST, request.FILES, initial=initial_data)
@@ -369,6 +400,8 @@ def nueva_constanciaOM(request):
     return render(request, 'constancias/nueva_constanciaOM.html', context)
 
 # Vista para editar constancias de "Otro Motivo"
+
+
 @login_required
 @verificar_acceso_constancia('OTRO')
 def editar_constanciaOM(request, id_constancia):
@@ -392,7 +425,6 @@ def editar_constanciaOM(request, id_constancia):
                 constancia.incluir_logo = form.cleaned_data.get('incluir_logo', False)
                 constancia.logo = configuracion.logo if configuracion else None
 
-            
             return redirect('constancia_generada', constancia_id=constancia.id)
     else:
         form = ConstanciaOtroMotivoForm(instance=constancia)
@@ -405,7 +437,8 @@ def editar_constanciaOM(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaOM.html', context)
 
-#promocion vertical-------------------------------
+# promocion vertical-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('PROM_VERTICAL')
@@ -416,7 +449,7 @@ def nueva_constanciaPV(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaPromocionVerticalForm(request.POST, request.FILES, initial=initial_data)
@@ -465,6 +498,7 @@ def nueva_constanciaPV(request):
         'editar': False
     }
     return render(request, 'constancias/nueva_constanciaPV.html', context)
+
 
 @login_required
 @verificar_acceso_constancia('PROM_VERTICAL')
@@ -523,7 +557,8 @@ def editar_constanciaPV(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaPV.html', context)
 
-#Admision-------------------------------
+# Admision-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('ADMISION')
@@ -534,7 +569,7 @@ def nueva_constanciaAdmision(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaAdmisionForm(request.POST, request.FILES, initial=initial_data)
@@ -575,6 +610,7 @@ def nueva_constanciaAdmision(request):
         'editar': False
     }
     return render(request, 'constancias/nueva_constanciaAdmision.html', context)
+
 
 @login_required
 @verificar_acceso_constancia('ADMISION')
@@ -622,7 +658,8 @@ def editar_constanciaAdmision(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaAdmision.html', context)
 
-#Horas Adicionales-------------------------------
+# Horas Adicionales-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('HORAS_ADIC')
@@ -632,7 +669,7 @@ def nueva_constanciaHA(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaHorasAdicionalesForm(request.POST, request.FILES, initial=initial_data)
@@ -740,7 +777,8 @@ def editar_constanciaHA(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaHA.html', context)
 
-#Cambio Centro Trabajo-------------------------------
+# Cambio Centro Trabajo-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('CAMBIO_CENTRO')
@@ -750,7 +788,7 @@ def nueva_constanciaCambioCT(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaCambioCentroTrabajoForm(request.POST, request.FILES, initial=initial_data)
@@ -858,7 +896,8 @@ def editar_constanciaCambioCT(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaCambioCT.html', context)
 
-#Reconocimiento-------------------------------
+# Reconocimiento-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('RECONOCIMIENTO')
@@ -869,7 +908,7 @@ def nueva_constanciaReconocimiento(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaReconocimientoForm(request.POST, request.FILES, initial=initial_data)
@@ -977,7 +1016,8 @@ def editar_constanciaReconocimiento(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaReconocimiento.html', context)
 
-#Promocion Horizontal-------------------------------
+# Promocion Horizontal-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('PROM_HORIZONTAL')
@@ -988,7 +1028,7 @@ def nueva_constanciaPH(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaPromocionHorizontalForm(request.POST, request.FILES, initial=initial_data)
@@ -1037,6 +1077,7 @@ def nueva_constanciaPH(request):
         'editar': False
     }
     return render(request, 'constancias/nueva_constanciaPH.html', context)
+
 
 @login_required
 @verificar_acceso_constancia('PROM_HORIZONTAL')
@@ -1095,7 +1136,8 @@ def editar_constanciaPH(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaPH.html', context)
 
-#Basificacion Estatal-------------------------------
+# Basificacion Estatal-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('BASE_ESTATAL')
@@ -1106,7 +1148,7 @@ def nueva_constanciaBE(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaBasificacionEstatalForm(request.POST, request.FILES, initial=initial_data)
@@ -1195,7 +1237,8 @@ def editar_constanciaBE(request, id_constancia):
 
     return render(request, 'constancias/nueva_constanciaBE.html', context)
 
-#Cambio Centro Trabajo Preparatorias-------------------------------
+# Cambio Centro Trabajo Preparatorias-------------------------------
+
 
 @login_required
 @verificar_acceso_constancia('CAMBIO_CENTRO_PREP')
@@ -1206,7 +1249,7 @@ def nueva_constanciaCambioCTP(request):
     # Obtener los valores de la sesión
     rfc = request.session.get('rfc')
     claveCT = request.session.get('claveCT')
-    initial_data=inicializar_Datos_Form_Constancias(rfc, claveCT)
+    initial_data = inicializar_Datos_Form_Constancias(rfc, claveCT)
 
     if request.method == 'POST':
         form = ConstanciaCambioCentroTrabajoPreparatoriasForm(request.POST, request.FILES, initial=initial_data)
@@ -1315,7 +1358,7 @@ def editar_constanciaCambioCTP(request, id_constancia):
     return render(request, 'constancias/nueva_constanciaCambioCTP.html', context)
 
 
-#crear constancia viejo
+# crear constancia viejo
 
 # @login_required
 # def crear_constancia(request):

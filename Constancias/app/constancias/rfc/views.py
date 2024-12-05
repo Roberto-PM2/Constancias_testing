@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.db import connections
 import re
 
@@ -12,15 +12,14 @@ def validar_rfc(rfc):
     return True, ""
 
 
-
 def ingresar_rfc(request):
     if request.method == 'POST':
         rfc = request.POST.get('rfc', '').strip()
-        
+
         es_valido, error = validar_rfc(rfc)
         if not es_valido:
             return render(request, 'ingresar_rfc.html', {'error': error})
-        
+
         sql = """
            SELECT NOMBRE, CURP FROM EMPLEADO_COMP WHERE RFC = %s
         """
@@ -33,7 +32,7 @@ def ingresar_rfc(request):
             return render(request, 'seleccionar_constancia.html', {'empleado': empleado})
         else:
             return render(request, 'ingresar_rfc.html', {'error': "No se encontró un empleado con el RFC ingresado."})
-    
+
     return render(request, 'ingresar_rfc.html')
 
 

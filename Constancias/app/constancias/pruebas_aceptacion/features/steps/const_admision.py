@@ -27,7 +27,7 @@ def step_impl(context):
     data = {
         'rfc': '000020860d47c',
         'claveCT': '32ABJ0001W',
-        'tipo_constancia':'ADMISION'
+        'tipo_constancia': 'ADMISION'
     }
     context.driver.find_element(By.NAME, 'rfc').send_keys(data['rfc'])
     context.driver.find_element(By.NAME, 'claveCT').send_keys(data['claveCT'])
@@ -36,7 +36,6 @@ def step_impl(context):
     select_nombramiento.select_by_value(data['tipo_constancia'])
     context.driver.find_element(By.ID, 'btnCrear').click()
     time.sleep(1)  # Espera para procesar la solicitud
-
 
 
 @when(u'completo el formulario de constancia admisión')
