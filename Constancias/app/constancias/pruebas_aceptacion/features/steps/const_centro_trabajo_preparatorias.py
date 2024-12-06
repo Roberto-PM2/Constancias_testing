@@ -32,8 +32,8 @@ def step_impl(context):
     context.driver.find_element(By.NAME, 'rfc').send_keys(data['rfc'])
     context.driver.find_element(By.NAME, 'claveCT').send_keys(data['claveCT'])
     # Seleccionar el tipo de constancia
-    select_nombramiento = Select(context.driver.find_element(By.NAME, 'tipo_constancia'))
-    select_nombramiento.select_by_value(data['tipo_constancia'])
+    select_tipo = Select(context.driver.find_element(By.NAME, 'tipo_constancia'))
+    select_tipo.select_by_value(data['tipo_constancia'])
     context.driver.find_element(By.ID, 'btnCrear').click()
     time.sleep(1)  # Espera para procesar la solicitud
 
@@ -42,15 +42,8 @@ def step_impl(context):
 def step_impl(context):
     data = {
         'curp': 'CTPW050729MMCSHNA3',
-        'filiacion': 'RFC123456',
-        'nombre_completo': 'John Doe',
         'categoria_plaza': 'Profesor',
         'tipo_nombramiento': '09',
-        'clave_centro_trabajo': 'CENTRO123',
-        'nombre_centro_trabajo': 'Escuela Preparatoria',
-        'direccion': '123 Calle Principal',
-        'municipio': 'Ciudad',
-        'localidad': 'Localidad',
         'sueldo_mensual': '12345.67',
         'partida': '7-1103',
         'fecha_input': datetime.today().strftime('%Y-%m-%d'),
@@ -61,15 +54,7 @@ def step_impl(context):
     # Rellenar cada campo del formulario
     context.driver.find_element(By.NAME, 'curp').clear()
     context.driver.find_element(By.NAME, 'curp').send_keys(data['curp'])
-    context.driver.find_element(By.NAME, 'filiacion').send_keys(data['filiacion'])
-    context.driver.find_element(By.NAME, 'nombre_completo').send_keys(data['nombre_completo'])
     context.driver.find_element(By.NAME, 'categoria_plaza').send_keys(data['categoria_plaza'])
-
-    context.driver.find_element(By.NAME, 'clave_centro_trabajo').send_keys(data['clave_centro_trabajo'])
-    context.driver.find_element(By.NAME, 'nombre_centro_trabajo').send_keys(data['nombre_centro_trabajo'])
-    context.driver.find_element(By.NAME, 'direccion').send_keys(data['direccion'])
-    context.driver.find_element(By.NAME, 'municipio').send_keys(data['municipio'])
-    context.driver.find_element(By.NAME, 'localidad').send_keys(data['localidad'])
 
     context.driver.find_element(By.NAME, 'fecha_input').send_keys(data['fecha_input'])
     context.driver.find_element(By.NAME, 'firma').send_keys(data['firma'])

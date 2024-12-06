@@ -1,6 +1,6 @@
 Característica: Inicio de sesión
 Como usuario del sistema
-necesito iniciar sesiión
+necesito iniciar sesión
 para realizar la generacion de constancias.
 
 

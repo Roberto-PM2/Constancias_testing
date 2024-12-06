@@ -27,13 +27,13 @@ def step_impl(context):
     data = {
         'rfc': '000020860d47c',
         'claveCT': '32ABJ0001W',
-        'tipo_constancia': 'OTRO'
+        'tipo_constancia':'OTRO'
     }
     context.driver.find_element(By.NAME, 'rfc').send_keys(data['rfc'])
     context.driver.find_element(By.NAME, 'claveCT').send_keys(data['claveCT'])
     # Seleccionar el tipo de constancia
-    select_nombramiento = Select(context.driver.find_element(By.NAME, 'tipo_constancia'))
-    select_nombramiento.select_by_value(data['tipo_constancia'])
+    select_tipo = Select(context.driver.find_element(By.NAME, 'tipo_constancia'))
+    select_tipo.select_by_value(data['tipo_constancia'])
     context.driver.find_element(By.ID, 'btnCrear').click()
     time.sleep(1)  # Espera para procesar la solicitud
 
@@ -42,15 +42,8 @@ def step_impl(context):
 def step_impl(context):
     data = {
         'curp': 'COMW050729MMCSHNA1',
-        'filiacion': 'RFC123456',
-        'nombre_completo': 'John Doe',
         'categoria_plaza': 'Profesor',
         'tipo_nombramiento': '09',
-        'clave_centro_trabajo': 'CENTRO123',
-        'nombre_centro_trabajo': 'Escuela Primaria',
-        'direccion': '123 Calle Principal',
-        'municipio': 'Ciudad',
-        'localidad': 'Localidad',
         'sueldo_mensual': '12345.67',
         'partida': '7-1103',
         'fecha_input': datetime.today().strftime('%Y-%m-%d'),
@@ -62,20 +55,14 @@ def step_impl(context):
     # Rellenar cada campo del formulario
     context.driver.find_element(By.NAME, 'curp').clear()
     context.driver.find_element(By.NAME, 'curp').send_keys(data['curp'])
-    context.driver.find_element(By.NAME, 'filiacion').send_keys(data['filiacion'])
-    context.driver.find_element(By.NAME, 'nombre_completo').send_keys(data['nombre_completo'])
     context.driver.find_element(By.NAME, 'categoria_plaza').send_keys(data['categoria_plaza'])
 
     # Seleccionar el tipo de nombramiento desde un dropdown
     select_nombramiento = Select(context.driver.find_element(By.NAME, 'tipo_nombramiento'))
     select_nombramiento.select_by_value(data['tipo_nombramiento'])
 
-    context.driver.find_element(By.NAME, 'clave_centro_trabajo').send_keys(data['clave_centro_trabajo'])
-    context.driver.find_element(By.NAME, 'nombre_centro_trabajo').send_keys(data['nombre_centro_trabajo'])
-    context.driver.find_element(By.NAME, 'direccion').send_keys(data['direccion'])
-    context.driver.find_element(By.NAME, 'municipio').send_keys(data['municipio'])
-    context.driver.find_element(By.NAME, 'localidad').send_keys(data['localidad'])
     context.driver.find_element(By.NAME, 'sueldo_mensual').send_keys(data['sueldo_mensual'])
+
     # Seleccionar el tipo de partida desde un dropdown
     select_nombramiento = Select(context.driver.find_element(By.NAME, 'partida'))
     select_nombramiento.select_by_value(data['partida'])
@@ -85,6 +72,7 @@ def step_impl(context):
 
     time.sleep(2)
 
+    # Rellenar campos de "claves[]"
     context.driver.find_element(By.ID, 'clave-nueva').send_keys(data['clave'])
 
 

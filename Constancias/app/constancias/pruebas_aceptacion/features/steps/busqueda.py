@@ -13,16 +13,16 @@ def acceder_seccion_busqueda(context):
 
 @when(u'ingreso "{nombre}" en el filtro de nombre')
 def ingresar_nombre(context, nombre):
-    time.sleep(3)
+    time.sleep(1)
     context.driver.find_element(By.NAME, 'nombre').send_keys(nombre)
-    time.sleep(3)
+    time.sleep(1)
 
 
 @when(u'presiono el botón de "Buscar"')
 def presionar_boton_buscar(context):
-    time.sleep(3)
+    time.sleep(1)
     context.driver.find_element(By.ID, 'btnBuscar').click()
-    time.sleep(3)
+    time.sleep(1)
 
 
 @then(u'el sistema muestra únicamente las constancias que coincidan con el nombre "{nombre}"')
@@ -64,13 +64,13 @@ def ingresar_rfc_invalido(context, rfc):
     rfc_input = context.driver.find_element(By.NAME, 'rfc')
     rfc_input.clear()
     rfc_input.send_keys(rfc)
-    time.sleep(10)
+    time.sleep(1)
 
 
 @then(u'el sistema muestra el mensaje de error "{msj_rfc_error}"')
 def verificar_mensaje_error_rfc(context, msj_rfc_error):
     mensaje_error = context.driver.find_element(By.ID, 'rfc-error')
-    time.sleep(10)
+    time.sleep(1)
     assert mensaje_error.is_displayed(
     ), "El mensaje de error para RFC no válido no se mostró"
     assert mensaje_error.text == msj_rfc_error, \
